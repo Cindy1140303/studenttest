@@ -1,0 +1,400 @@
+
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>考題管理系統儀表板</title>
+    <!-- Load Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <!-- Load Lucide icons for responsive design -->
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+    
+    <style>
+        /* Custom Styles to match the mockup's aesthetic */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f0f0; /* Light background matching mockup */
+        }
+        .nav-bar-bg {
+            background-color: #e6e6e6; /* Slightly darker gray for the background section */
+        }
+        .tab-button {
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            position: relative;
+            margin-right: 0.5rem;
+            border-radius: 0.5rem;
+            padding: 0.75rem 1.5rem;
+            font-weight: 600;
+            color: white; /* 預設文字顏色：白色 (未點擊狀態) */
+        }
+        .tab-button::before {
+            content: '•';
+            position: absolute;
+            left: 0.5rem;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 1.25rem;
+            line-height: 1;
+            color: white; /* 預設小點顏色：白色 (未點擊狀態) */
+        }
+        /* Custom colors for tabs - ONLY set background color now, text color is controlled by .tab-button/.tab-active */
+        .tab-green { background-color: #178a48; } /* 考題分派 */
+        .tab-blue { background-color: #5284cb; } /* 考題管理 */
+        .tab-orange { background-color: #ffb230; } /* 模式管理 */
+        .tab-red { background-color: #ff694d; } /* 答題記錄 */
+        
+        /* The active tab has a different look and sets the active color */
+        .tab-active {
+            z-index: 10;
+            margin-top: -1rem; /* Lift up the active tab */
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            color: #333; /* 點擊後文字顏色：黑色/深灰色 */
+        }
+        /* Active bullet point color */
+        .tab-active::before {
+            color: #333; /* 點擊後小點顏色：黑色/深灰色 */
+        }
+
+        .input-style {
+            background-color: #fff8e8; /* Light yellowish input background */
+            border: 1px solid #ffcc99;
+            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
+            border-radius: 0.5rem;
+            padding: 0.5rem 1rem;
+        }
+        .action-button {
+            border-radius: 0.75rem;
+            padding: 0.75rem 1.5rem;
+            font-weight: 600;
+            box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
+            transition: background-color 0.2s;
+        }
+    </style>
+</head>
+<body>
+
+<div id="app" class="min-h-screen flex flex-col">
+    <!-- Header/Navigation Bar -->
+    <header class="w-full h-24 flex items-end justify-center z-10">
+        <div class="flex max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <button class="tab-button tab-green tab-active" data-tab="assignment" style="--button-color: #178a48;">考題分派</button>
+            <button class="tab-button tab-blue" data-tab="management" style="--button-color: #5284cb;">考題管理</button>
+            <button class="tab-button tab-orange" data-tab="mode" style="--button-color: #ffb230;">模式管理</button>
+            <button class="tab-button tab-red" data-tab="record" style="--button-color: #ff694d;">答題記錄</button>
+        </div>
+    </header>
+
+    <!-- Main Content Area -->
+    <main class="flex-grow nav-bar-bg pt-12 pb-8 px-4 sm:px-6 lg:px-8">
+        <div id="content-container" class="max-w-7xl mx-auto bg-white p-6 md:p-10 rounded-xl shadow-2xl min-h-[70vh]">
+            
+            <!-- 考題分派 Tab Content (Default Active) -->
+            <div id="tab-assignment" class="active-content">
+                <h2 class="text-3xl font-bold text-gray-800 mb-6 hidden">考題分派</h2>
+
+                <!-- Filter and Action Area (Matching image_8e3546.png) -->
+                <div class="flex flex-col md:flex-row md:items-center space-y-4 md:space-y-0 md:space-x-8 mb-8 p-4 bg-gray-50 rounded-lg">
+                    
+                    <!-- Dropdown: 課別 (Course) -->
+                    <div class="flex items-center space-x-3">
+                        <label for="assign-course-select" class="text-gray-600 whitespace-nowrap">課別</label>
+                        <div class="relative">
+                            <select id="assign-course-select" class="input-style w-48 appearance-none focus:outline-none focus:ring-2 focus:ring-green-500 pr-10">
+                                <option value="">請選擇課程</option>
+                                <option value="math">數學</option>
+                                <option value="history" selected>歷史</option>
+                                <option value="science">科學</option>
+                            </select>
+                            <i data-lucide="chevron-down" class="text-gray-500 absolute right-2 top-1/2 transform -translate-y-1/2 pointer-events-none w-5 h-5"></i>
+                        </div>
+                    </div>
+
+                    <!-- Dropdown: 考題模式 (Exam Mode) -->
+                    <div class="flex items-center space-x-3">
+                        <label for="assign-mode-select" class="text-gray-600 whitespace-nowrap">考題模式</label>
+                        <div class="relative">
+                            <select id="assign-mode-select" class="input-style w-48 appearance-none focus:outline-none focus:ring-2 focus:ring-green-500 pr-10">
+                                <option value="">請選擇模式</option>
+                                <option value="connect">連連看</option>
+                                <option value="drag">拖拉方塊</option>
+                                <option value="single" selected>單選題</option>
+                            </select>
+                            <i data-lucide="chevron-down" class="text-gray-500 absolute right-2 top-1/2 transform -translate-y-1/2 pointer-events-none w-5 h-5"></i>
+                        </div>
+                    </div>
+
+                    <!-- Action Button: 確定/預覽 (Confirm/Preview) -->
+                    <button class="action-button bg-gradient-to-r from-orange-400 to-pink-500 hover:from-orange-500 hover:to-pink-600 text-white md:ml-auto whitespace-nowrap">
+                        確定/預覽
+                    </button>
+                </div>
+                
+                <p class="text-gray-500 p-8 border-4 border-dashed border-gray-200 rounded-xl text-center text-lg font-medium bg-white h-64 flex items-center justify-center">
+                    選擇課程和考題模式後，將在這裡顯示考題分派的詳細預覽介面。
+                </p>
+            </div>
+
+            
+            <!-- Question Management Tab Content -->
+            <div id="tab-management" class="hidden">
+                <h2 class="text-3xl font-bold text-gray-800 mb-6 hidden">考題管理</h2>
+
+                <!-- Filter and Action Area -->
+                <div class="flex flex-col md:flex-row md:items-center space-y-4 md:space-y-0 md:space-x-6 mb-8 p-4 bg-gray-50 rounded-lg">
+                    
+                    <!-- Dropdown: 課別 (Course) -->
+                    <div class="flex items-center space-x-3">
+                        <label for="course-select" class="text-gray-600 whitespace-nowrap">課別</label>
+                        <div class="relative">
+                            <select id="course-select" class="input-style w-40 appearance-none focus:outline-none focus:ring-2 focus:ring-blue-500 pr-10">
+                                <option value="">請選擇課程</option>
+                                <option value="math">數學</option>
+                                <option value="history" selected>歷史</option>
+                                <option value="science">科學</option>
+                            </select>
+                            <i data-lucide="chevron-down" class="text-gray-500 absolute right-2 top-1/2 transform -translate-y-1/2 pointer-events-none w-5 h-5"></i>
+                        </div>
+                    </div>
+
+                    <!-- Dropdown: 知識點 (Knowledge Point) -->
+                    <div class="flex items-center space-x-3">
+                        <label for="knowledge-select" class="text-gray-600 whitespace-nowrap">知識點</label>
+                        <div class="relative">
+                            <select id="knowledge-select" class="input-style w-40 appearance-none focus:outline-none focus:ring-2 focus:ring-blue-500 pr-10">
+                                <option value="">請選擇知識點</option>
+                                <option value="calc">微積分</option>
+                                <option value="ancient" selected>古代文明</option>
+                            </select>
+                            <i data-lucide="chevron-down" class="text-gray-500 absolute right-2 top-1/2 transform -translate-y-1/2 pointer-events-none w-5 h-5"></i>
+                        </div>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="flex flex-col sm:flex-row md:ml-auto space-y-3 sm:space-y-0 sm:space-x-3">
+                        <button class="action-button bg-gray-200 hover:bg-gray-300 text-gray-700">查詢</button>
+                        <button class="action-button bg-pink-500 hover:bg-pink-600 text-white">匯入考題與答案</button>
+                    </div>
+                </div>
+
+                <!-- Manual Add Button (Floating/Separated) -->
+                <div class="flex justify-end mb-6">
+                    <button class="action-button bg-gradient-to-r from-orange-400 to-pink-500 hover:from-orange-500 hover:to-pink-600 text-white">
+                        <i data-lucide="plus" class="inline w-5 h-5 mr-2"></i>
+                        手動新增
+                    </button>
+                </div>
+                
+                <!-- Data Table -->
+                <div class="overflow-x-auto rounded-lg shadow-lg">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-blue-600 text-white">
+                            <tr>
+                                <th class="px-3 py-3 text-left text-xs font-medium uppercase tracking-wider">匯入日期</th>
+                                <th class="px-3 py-3 text-left text-xs font-medium uppercase tracking-wider">課別</th>
+                                <th class="px-3 py-3 text-left text-xs font-medium uppercase tracking-wider">章節</th>
+                                <th class="px-3 py-3 text-left text-xs font-medium uppercase tracking-wider">知識點</th>
+                                <th class="px-3 py-3 text-left text-xs font-medium uppercase tracking-wider">題型</th>
+                                <th class="px-3 py-3 text-left text-xs font-medium uppercase tracking-wider">選項</th>
+                                <th class="px-3 py-3 text-left text-xs font-medium uppercase tracking-wider">答案</th>
+                                <th class="px-3 py-3 text-center text-xs font-medium uppercase tracking-wider">操作</th>
+                            </tr>
+                        </thead>
+                        <tbody id="question-table-body" class="bg-white divide-y divide-gray-200">
+                            <!-- Mock data will be inserted here by JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- 模式管理 Tab Content (Matching image_8e3562.png) -->
+            <div id="tab-mode" class="hidden">
+                <h3 class="text-xl font-semibold mb-8 text-gray-800 text-center">互動考題模式定義 (VUE Code)</h3>
+
+                <div class="space-y-12">
+                    
+                    <!-- Mode 1: 連連看 (Connect-the-Dots) -->
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start p-4 border border-gray-200 rounded-xl bg-gray-50">
+                        <div class="flex items-start space-x-4">
+                            <span class="text-2xl font-mono pt-1 text-gray-500 w-8 text-right">1.</span>
+                            <div class="flex-grow">
+                                <label class="text-sm font-medium text-gray-600 mb-2 block">HTML/JS/CSS code(VUE)</label>
+                                <textarea class="input-style w-full h-40 focus:outline-none focus:ring-2 focus:ring-orange-500 p-3 text-sm font-mono resize-none" placeholder="在此輸入 VUE 單檔案組件代碼（連連看模式）..."></textarea>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="text-sm font-medium text-gray-600 mb-2 block">對應模式名稱</label>
+                            <!-- CHANGED to input for flexible naming -->
+                            <input type="text" value="連連看" class="input-style w-full text-lg font-bold text-center py-4 bg-yellow-200 border-yellow-500 text-gray-800 focus:outline-none focus:ring-2 focus:ring-orange-500">
+                        </div>
+                    </div>
+
+                    <!-- Mode 2: 拖拉方塊 (Drag Blocks) -->
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start p-4 border border-gray-200 rounded-xl bg-gray-50">
+                        <div class="flex items-start space-x-4">
+                            <span class="text-2xl font-mono pt-1 text-gray-500 w-8 text-right">2.</span>
+                            <div class="flex-grow">
+                                <label class="text-sm font-medium text-gray-600 mb-2 block">HTML/JS/CSS code(VUE)</label>
+                                <textarea class="input-style w-full h-40 focus:outline-none focus:ring-2 focus:ring-orange-500 p-3 text-sm font-mono resize-none" placeholder="在此輸入 VUE 單檔案組件代碼（拖拉方塊模式）..."></textarea>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="text-sm font-medium text-gray-600 mb-2 block">對應模式名稱</label>
+                            <!-- CHANGED to input for flexible naming -->
+                            <input type="text" value="拖拉方塊" class="input-style w-full text-lg font-bold text-center py-4 bg-yellow-200 border-yellow-500 text-gray-800 focus:outline-none focus:ring-2 focus:ring-orange-500">
+                        </div>
+                    </div>
+                    
+                    <!-- Mode 3: 單選題 (Single Choice) - Note the mockup repeats '1.' here, corrected to '3.' -->
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start p-4 border border-gray-200 rounded-xl bg-gray-50">
+                        <div class="flex items-start space-x-4">
+                            <span class="text-2xl font-mono pt-1 text-gray-500 w-8 text-right">3.</span>
+                            <div class="flex-grow">
+                                <label class="text-sm font-medium text-gray-600 mb-2 block">HTML/JS/CSS code(VUE)</label>
+                                <textarea class="input-style w-full h-40 focus:outline-none focus:ring-2 focus:ring-orange-500 p-3 text-sm font-mono resize-none" placeholder="在此輸入 VUE 單檔案組件代碼（單選題模式）..."></textarea>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="text-sm font-medium text-gray-600 mb-2 block">對應模式名稱</label>
+                            <!-- CHANGED to input for flexible naming -->
+                            <input type="text" value="單選題" class="input-style w-full text-lg font-bold text-center py-4 bg-yellow-200 border-yellow-500 text-gray-800 focus:outline-none focus:ring-2 focus:ring-orange-500">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 答題記錄 Tab Content -->
+            <div id="tab-record" class="hidden text-center p-12 text-gray-500">
+                <i data-lucide="clipboard-list" class="w-16 h-16 mx-auto mb-4"></i>
+                <p class="text-xl">這是「答題記錄」的內容，用於查看學生的作答歷史。</p>
+            </div>
+
+        </div>
+
+        <!-- Message Box for alerts/confirmation (placed outside the main content block) -->
+        <div id="message-box" class="fixed inset-0 bg-gray-900 bg-opacity-50 hidden items-center justify-center z-50">
+            <div class="bg-white p-8 rounded-lg shadow-2xl max-w-sm w-full text-center">
+                <p id="message-text" class="text-lg font-medium mb-4 text-gray-700"></p>
+                <button id="message-confirm" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg font-semibold w-full">確定</button>
+            </div>
+        </div>
+    </main>
+</div>
+
+<script>
+    // Initialize Lucide Icons
+    lucide.createIcons();
+
+    // Mock Data for the table (used in '考題管理')
+    const mockQuestions = [
+        { date: '2025/01/10', course: '數學', chapter: '第3章', knowledge: '微積分', item: '單選題', options: 'A,B,C,D', answer: 'C' },
+        { date: '2025/01/10', course: '歷史', chapter: '第5章', knowledge: '古代文明', item: '連連看', options: '4組', answer: '見圖' },
+        { date: '2025/01/11', course: '科學', chapter: '第1章', knowledge: '物理學', item: '是非題', options: '是,否', answer: '是' },
+    ];
+
+    const tableBody = document.getElementById('question-table-body');
+    const tabButtons = document.querySelectorAll('.tab-button');
+    const contentContainer = document.getElementById('content-container');
+    const messageBox = document.getElementById('message-box');
+    const messageText = document.getElementById('message-text');
+    const messageConfirm = document.getElementById('message-confirm');
+
+    // Function to show custom message box
+    function showMessage(text) {
+        messageText.textContent = text;
+        messageBox.classList.remove('hidden');
+        messageBox.classList.add('flex');
+    }
+
+    // Event listener for message box confirmation
+    messageConfirm.addEventListener('click', () => {
+        messageBox.classList.add('hidden');
+        messageBox.classList.remove('flex');
+    });
+
+    // Render Table Data for '考題管理' tab
+    function renderQuestions() {
+        tableBody.innerHTML = ''; // Clear existing rows
+        mockQuestions.forEach((q, index) => {
+            const row = document.createElement('tr');
+            row.className = index % 2 === 0 ? 'bg-white' : 'bg-gray-50';
+            
+            row.innerHTML = `
+                <td class="px-3 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${q.date}</td>
+                <td class="px-3 py-4 whitespace-nowrap text-sm text-gray-500">${q.course}</td>
+                <td class="px-3 py-4 whitespace-nowrap text-sm text-gray-500">${q.chapter}</td>
+                <td class="px-3 py-4 whitespace-nowrap text-sm text-gray-500">${q.knowledge}</td>
+                <td class="px-3 py-4 whitespace-nowrap text-sm text-gray-500">${q.item}</td>
+                <td class="px-3 py-4 whitespace-nowrap text-sm text-gray-500">${q.options}</td>
+                <td class="px-3 py-4 whitespace-nowrap text-sm text-gray-500">${q.answer}</td>
+                <td class="px-3 py-4 whitespace-nowrap text-center text-sm font-medium">
+                    <div class="flex items-center justify-center space-x-2">
+                        <!-- Edit Button -->
+                        <button onclick="handleAction('edit', ${index})" class="text-blue-500 hover:text-blue-700 p-2 rounded-full hover:bg-blue-100 transition">
+                            <i data-lucide="pencil" class="w-5 h-5"></i>
+                        </button>
+                        <!-- Delete Button -->
+                        <button onclick="handleAction('delete', ${index})" class="text-red-500 hover:text-red-700 p-2 rounded-full hover:bg-red-100 transition">
+                            <i data-lucide="trash-2" class="w-5 h-5"></i>
+                        </button>
+                    </div>
+                </td>
+            `;
+            tableBody.appendChild(row);
+        });
+        // Re-initialize icons for newly added table rows
+        lucide.createIcons();
+    }
+
+    // Handle Edit/Delete Actions (for '考題管理')
+    window.handleAction = function(action, index) {
+        const question = mockQuestions[index];
+        if (action === 'edit') {
+            showMessage(`正在編輯：${question.course} - ${question.item} 考題。`);
+        } else if (action === 'delete') {
+            showMessage(`確認要刪除：${question.course} - ${question.item} 考題嗎？ (實際操作中需要二次確認)`);
+        }
+    }
+
+    // Tab Switching Logic
+    tabButtons.forEach(button => {
+        button.addEventListener('click', () => {
+            const targetTab = button.getAttribute('data-tab');
+
+            // 1. Update Tab Visuals
+            tabButtons.forEach(btn => {
+                btn.classList.remove('tab-active');
+                btn.style.marginTop = '0';
+            });
+            button.classList.add('tab-active');
+            button.style.marginTop = '-1rem';
+
+            // 2. Switch Content
+            document.querySelectorAll('#content-container > div').forEach(content => {
+                if (content.id === `tab-${targetTab}`) {
+                    content.classList.remove('hidden');
+                } else {
+                    content.classList.add('hidden');
+                }
+            });
+            
+            // Re-render table when switching back to management (optional, but good practice for dynamic data)
+            if (targetTab === 'management') {
+                 renderQuestions(); 
+            }
+        });
+    });
+
+    // Initial Tab Setup: Set '考題分派' as active on load and render questions for '考題管理'
+    window.onload = function() {
+        // Set '考題分派' as the initial active tab
+        document.querySelector('.tab-button[data-tab="assignment"]').click();
+        
+        // This is only called to ensure the icons are created once the elements are in the DOM, 
+        // but 'renderQuestions' is explicitly called inside the tab switching logic for 'management'.
+    }
+</script>
+
+</body>
+</html>
