@@ -77,15 +77,17 @@
 
 <div id="app" class="min-h-screen flex flex-col">
     <!-- Header/Navigation Bar -->
-    <header class="w-full flex flex-col items-center justify-end z-10 pb-0" style="min-height: 120px;">
+    <header class="w-full flex flex-col justify-end z-10 pb-0" style="min-height: 120px;">
         <div class="text-center mb-4">
             <h1 class="text-4xl font-bold text-gray-800 tracking-wide">考題管理平台</h1>
         </div>
-        <div class="flex max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <button class="tab-button tab-green tab-active" data-tab="assignment" style="--button-color: #178a48;">考題分派</button>
-            <button class="tab-button tab-blue" data-tab="management" style="--button-color: #5284cb;">考題管理</button>
-            <button class="tab-button tab-orange" data-tab="mode" style="--button-color: #ffb230;">模式管理</button>
-            <button class="tab-button tab-red" data-tab="record" style="--button-color: #ff694d;">答題記錄</button>
+        <div class="flex justify-end max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex">
+                <button class="tab-button tab-green tab-active" data-tab="assignment" style="--button-color: #178a48;">考題分派</button>
+                <button class="tab-button tab-blue" data-tab="management" style="--button-color: #5284cb;">考題管理</button>
+                <button class="tab-button tab-orange" data-tab="mode" style="--button-color: #ffb230;">模式管理</button>
+                <button class="tab-button tab-red" data-tab="record" style="--button-color: #ff694d;">答題記錄</button>
+            </div>
         </div>
     </header>
 
