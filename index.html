@@ -178,14 +178,14 @@
 
                     <!-- Action Buttons -->
                     <div class="flex flex-col sm:flex-row md:ml-auto space-y-3 sm:space-y-0 sm:space-x-3">
-                        <button class="action-button bg-gray-200 hover:bg-gray-300 text-gray-700">查詢</button>
-                        <button class="action-button bg-pink-500 hover:bg-pink-600 text-white">匯入考題與答案</button>
+                        <button id="query-button" class="action-button bg-gray-200 hover:bg-gray-300 text-gray-700">查詢</button>
+                        <button id="import-button" class="action-button bg-pink-500 hover:bg-pink-600 text-white">匯入考題與答案</button>
                     </div>
                 </div>
 
                 <!-- Manual Add Button (Floating/Separated) -->
                 <div class="flex justify-end mb-6">
-                    <button class="action-button bg-gradient-to-r from-orange-400 to-pink-500 hover:from-orange-500 hover:to-pink-600 text-white">
+                    <button id="manual-add-button" class="action-button bg-gradient-to-r from-orange-400 to-pink-500 hover:from-orange-500 hover:to-pink-600 text-white">
                         <i data-lucide="plus" class="inline w-5 h-5 mr-2"></i>
                         手動新增
                     </button>
@@ -282,6 +282,92 @@
             <div class="bg-white p-8 rounded-lg shadow-2xl max-w-sm w-full text-center">
                 <p id="message-text" class="text-lg font-medium mb-4 text-gray-700"></p>
                 <button id="message-confirm" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg font-semibold w-full">確定</button>
+            </div>
+        </div>
+
+        <!-- 手動新增考題表單 -->
+        <div id="add-question-modal" class="fixed inset-0 bg-gray-900 bg-opacity-50 hidden items-center justify-center z-50">
+            <div class="bg-white p-8 rounded-lg shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+                <h3 class="text-2xl font-bold mb-6 text-gray-800">手動新增考題</h3>
+                <form id="add-question-form" class="space-y-4">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">課別 *</label>
+                            <input type="text" id="new-course" required class="input-style w-full" placeholder="例如：數學">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">章節 *</label>
+                            <input type="text" id="new-chapter" required class="input-style w-full" placeholder="例如：第1章">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">知識點 *</label>
+                        <input type="text" id="new-knowledge" required class="input-style w-full" placeholder="例如：代數">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">題型 *</label>
+                        <select id="new-type" required class="input-style w-full">
+                            <option value="">請選擇題型</option>
+                            <option value="單選題">單選題</option>
+                            <option value="多選題">多選題</option>
+                            <option value="是非題">是非題</option>
+                            <option value="填空題">填空題</option>
+                            <option value="連連看">連連看</option>
+                            <option value="拖拉方塊">拖拉方塊</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">題目內容 *</label>
+                        <textarea id="new-content" required class="input-style w-full h-24" placeholder="請輸入題目內容"></textarea>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">選項 *</label>
+                        <input type="text" id="new-options" required class="input-style w-full" placeholder="例如：A. 選項1,B. 選項2,C. 選項3,D. 選項4">
+                        <p class="text-xs text-gray-500 mt-1">多個選項請用逗號分隔</p>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">答案 *</label>
+                        <input type="text" id="new-answer" required class="input-style w-full" placeholder="例如：B">
+                    </div>
+                    <div class="flex space-x-3 pt-4">
+                        <button type="submit" class="flex-1 bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg font-semibold">
+                            確定新增
+                        </button>
+                        <button type="button" id="cancel-add-button" class="flex-1 bg-gray-300 hover:bg-gray-400 text-gray-700 px-4 py-2 rounded-lg font-semibold">
+                            取消
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Excel 匯入表單 -->
+        <div id="import-modal" class="fixed inset-0 bg-gray-900 bg-opacity-50 hidden items-center justify-center z-50">
+            <div class="bg-white p-8 rounded-lg shadow-2xl max-w-lg w-full">
+                <h3 class="text-2xl font-bold mb-6 text-gray-800">匯入 Excel 檔案</h3>
+                <div class="space-y-4">
+                    <div class="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center">
+                        <input type="file" id="excel-file-input" accept=".xlsx,.xls,.csv" class="hidden">
+                        <label for="excel-file-input" class="cursor-pointer">
+                            <i data-lucide="upload" class="w-12 h-12 mx-auto mb-4 text-gray-400"></i>
+                            <p class="text-lg font-medium text-gray-700 mb-2">點擊上傳 Excel 檔案</p>
+                            <p class="text-sm text-gray-500">支援格式：.xlsx, .xls, .csv</p>
+                        </label>
+                        <p id="file-name" class="mt-4 text-sm text-gray-600"></p>
+                    </div>
+                    <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                        <p class="text-sm text-blue-800 font-medium mb-2">📋 Excel 格式說明：</p>
+                        <p class="text-xs text-blue-700">第一行為標題：課別、章節、知識點、題型、題目內容、選項、答案</p>
+                    </div>
+                    <div class="flex space-x-3 pt-4">
+                        <button id="confirm-import-button" disabled class="flex-1 bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg font-semibold disabled:opacity-50 disabled:cursor-not-allowed">
+                            確定匯入
+                        </button>
+                        <button id="cancel-import-button" class="flex-1 bg-gray-300 hover:bg-gray-400 text-gray-700 px-4 py-2 rounded-lg font-semibold">
+                            取消
+                        </button>
+                    </div>
+                </div>
             </div>
         </div>
     </main>
@@ -457,6 +543,137 @@
         });
     });
 
+    // ========== 新功能：查詢按鈕 ==========
+    document.getElementById('query-button').addEventListener('click', function() {
+        const course = document.getElementById('course-select').value;
+        const knowledge = document.getElementById('knowledge-select').value;
+        
+        const filters = {};
+        if (course) filters.course = course;
+        if (knowledge) filters.knowledge = knowledge;
+        
+        fetchQuestions(filters);
+        showMessage('查詢中...');
+    });
+
+    // ========== 新功能：手動新增按鈕 ==========
+    const addModal = document.getElementById('add-question-modal');
+    const addForm = document.getElementById('add-question-form');
+    
+    document.getElementById('manual-add-button').addEventListener('click', function() {
+        addModal.classList.remove('hidden');
+        addModal.classList.add('flex');
+        lucide.createIcons();
+    });
+    
+    document.getElementById('cancel-add-button').addEventListener('click', function() {
+        addModal.classList.add('hidden');
+        addModal.classList.remove('flex');
+        addForm.reset();
+    });
+    
+    addForm.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        const newQuestion = {
+            course: document.getElementById('new-course').value,
+            chapter: document.getElementById('new-chapter').value,
+            knowledge: document.getElementById('new-knowledge').value,
+            type: document.getElementById('new-type').value,
+            content: document.getElementById('new-content').value,
+            options: document.getElementById('new-options').value,
+            answer: document.getElementById('new-answer').value
+        };
+        
+        try {
+            const response = await fetch(`${API_BASE_URL}/questions`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(newQuestion)
+            });
+            
+            const result = await response.json();
+            
+            if (result.success) {
+                showMessage('✅ 考題新增成功！');
+                addModal.classList.add('hidden');
+                addModal.classList.remove('flex');
+                addForm.reset();
+                fetchQuestions(); // 重新載入資料
+            } else {
+                showMessage('❌ 新增失敗：' + result.message);
+            }
+        } catch (error) {
+            showMessage('❌ 新增失敗：' + error.message);
+        }
+    });
+
+    // ========== 新功能：Excel 匯入 ==========
+    const importModal = document.getElementById('import-modal');
+    const fileInput = document.getElementById('excel-file-input');
+    const fileName = document.getElementById('file-name');
+    const confirmImportBtn = document.getElementById('confirm-import-button');
+    let selectedFile = null;
+    
+    document.getElementById('import-button').addEventListener('click', function() {
+        importModal.classList.remove('hidden');
+        importModal.classList.add('flex');
+        lucide.createIcons();
+    });
+    
+    document.getElementById('cancel-import-button').addEventListener('click', function() {
+        importModal.classList.add('hidden');
+        importModal.classList.remove('flex');
+        fileInput.value = '';
+        fileName.textContent = '';
+        selectedFile = null;
+        confirmImportBtn.disabled = true;
+    });
+    
+    fileInput.addEventListener('change', function(e) {
+        selectedFile = e.target.files[0];
+        if (selectedFile) {
+            fileName.textContent = `已選擇：${selectedFile.name}`;
+            confirmImportBtn.disabled = false;
+        }
+    });
+    
+    confirmImportBtn.addEventListener('click', async function() {
+        if (!selectedFile) {
+            showMessage('請先選擇檔案');
+            return;
+        }
+        
+        const formData = new FormData();
+        formData.append('file', selectedFile);
+        
+        try {
+            const response = await fetch(`${API_BASE_URL}/questions/import`, {
+                method: 'POST',
+                body: formData
+            });
+            
+            const result = await response.json();
+            
+            if (result.success) {
+                showMessage(`✅ 成功匯入 ${result.imported || 0} 筆考題！`);
+                importModal.classList.add('hidden');
+                importModal.classList.remove('flex');
+                fileInput.value = '';
+                fileName.textContent = '';
+                selectedFile = null;
+                confirmImportBtn.disabled = true;
+                fetchQuestions(); // 重新載入資料
+            } else {
+                showMessage('❌ 匯入失敗：' + result.message);
+            }
+        } catch (error) {
+            showMessage('❌ 匯入失敗：' + error.message);
+        }
+    });
+
     // Initial Tab Setup: Set '考題分派' as active on load and render questions for '考題管理'
     window.onload = function() {
         // Set '考題分派' as the initial active tab
@@ -464,6 +681,9 @@
         
         // 預先載入考題資料
         fetchQuestions();
+        
+        // Initialize all icons
+        lucide.createIcons();
     }
 </script>
 

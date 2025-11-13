@@ -20,10 +20,12 @@ const assignmentRoutes = require('./routes/assignment');
 const questionsRoutes = require('./routes/questions');
 const modesRoutes = require('./routes/modes');
 const recordsRoutes = require('./routes/records');
+const importRoutes = require('./routes/import');
 
 // Use routes
 app.use('/api/assignment', assignmentRoutes);
 app.use('/api/questions', questionsRoutes);
+app.use('/api/questions', importRoutes); // Excel 匯入功能
 app.use('/api/modes', modesRoutes);
 app.use('/api/records', recordsRoutes);
 
