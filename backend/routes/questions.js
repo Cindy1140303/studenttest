@@ -2,148 +2,165 @@ const express = require('express');
 const router = express.Router();
 const multer = require('multer');
 const upload = multer({ dest: 'uploads/' });
+const Question = require('../models/Question');
 
 // GET - 取得所有考題（支援篩選）
-router.get('/', (req, res) => {
-  const { course, knowledge, chapter } = req.query;
-  
-  // 模擬資料，實際應該從資料庫查詢
-  let questions = [
-    {
-      id: 1,
-      date: '2025/01/10',
-      course: '數學',
-      chapter: '第3章',
-      knowledge: '微積分',
-      type: '單選題',
-      content: '求 f(x) = x² 在 x=2 的導數',
-      options: ['A. 2', 'B. 4', 'C. 8', 'D. 16'],
-      answer: 'B'
-    },
-    {
-      id: 2,
-      date: '2025/01/10',
-      course: '歷史',
-      chapter: '第5章',
-      knowledge: '古代文明',
-      type: '連連看',
-      content: '將朝代與其代表人物連線',
-      options: '4組',
-      answer: '見圖'
-    },
-    {
-      id: 3,
-      date: '2025/01/11',
-      course: '科學',
-      chapter: '第1章',
-      knowledge: '物理學',
-      type: '是非題',
-      content: '光速在真空中是恆定的',
-      options: ['是', '否'],
-      answer: '是'
-    }
-  ];
-  
-  // 根據篩選條件過濾
-  if (course) {
-    questions = questions.filter(q => q.course === course);
+router.get('/', async (req, res) => {
+  try {
+    const { course, knowledge, chapter } = req.query;
+    
+    // 建立查詢條件
+    let query = {};
+    if (course) query.course = course;
+    if (knowledge) query.knowledge = knowledge;
+    if (chapter) query.chapter = chapter;
+    
+    const questions = await Question.find(query).sort({ createdAt: -1 });
+    
+    // 轉換為前端需要的格式
+    const formattedQuestions = questions.map(q => ({
+      id: q._id,
+      date: q.createdAt.toISOString().split('T')[0],
+      course: q.course,
+      chapter: q.chapter,
+      knowledge: q.knowledge,
+      type: q.type,
+      content: q.content,
+      options: Array.isArray(q.options) ? q.options.join(',') : q.options,
+      answer: q.answer
+    }));
+    
+    res.json({
+      success: true,
+      data: formattedQuestions,
+      total: formattedQuestions.length
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: '查詢失敗',
+      error: error.message
+    });
   }
-  if (knowledge) {
-    questions = questions.filter(q => q.knowledge === knowledge);
-  }
-  if (chapter) {
-    questions = questions.filter(q => q.chapter === chapter);
-  }
-  
-  res.json({
-    success: true,
-    data: questions,
-    total: questions.length
-  });
 });
 
 // GET - 取得單一考題
-router.get('/:id', (req, res) => {
-  const { id } = req.params;
-  
-  // 這裡應該從資料庫查詢
-  const question = {
-    id: parseInt(id),
-    date: '2025/01/10',
-    course: '數學',
-    chapter: '第3章',
-    knowledge: '微積分',
-    type: '單選題',
-    content: '求 f(x) = x² 在 x=2 的導數',
-    options: ['A. 2', 'B. 4', 'C. 8', 'D. 16'],
-    answer: 'B'
-  };
-  
-  res.json({
-    success: true,
-    data: question
-  });
+router.get('/:id', async (req, res) => {
+  try {
+    const question = await Question.findById(req.params.id);
+    
+    if (!question) {
+      return res.status(404).json({
+        success: false,
+        message: '找不到該考題'
+      });
+    }
+    
+    res.json({
+      success: true,
+      data: question
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: '查詢失敗',
+      error: error.message
+    });
+  }
 });
 
 // POST - 手動新增考題
-router.post('/', (req, res) => {
-  const { course, chapter, knowledge, type, content, options, answer } = req.body;
-  
-  if (!course || !type || !content || !answer) {
-    return res.status(400).json({
+router.post('/', async (req, res) => {
+  try {
+    const { course, chapter, knowledge, type, content, options, answer } = req.body;
+    
+    if (!course || !type || !content || !answer) {
+      return res.status(400).json({
+        success: false,
+        message: '請填寫必要欄位：課別、題型、題目內容、答案'
+      });
+    }
+    
+    const newQuestion = new Question({
+      course,
+      chapter,
+      knowledge,
+      type,
+      content,
+      options,
+      answer
+    });
+    
+    await newQuestion.save();
+    
+    res.json({
+      success: true,
+      message: '考題新增成功',
+      data: newQuestion
+    });
+  } catch (error) {
+    res.status(500).json({
       success: false,
-      message: '請填寫必要欄位：課別、題型、題目內容、答案'
+      message: '新增失敗',
+      error: error.message
     });
   }
-  
-  // 這裡應該將資料儲存到資料庫
-  const newQuestion = {
-    id: Date.now(),
-    date: new Date().toISOString().split('T')[0],
-    course,
-    chapter,
-    knowledge,
-    type,
-    content,
-    options,
-    answer
-  };
-  
-  res.json({
-    success: true,
-    message: '考題新增成功',
-    data: newQuestion
-  });
 });
 
 // PUT - 更新考題
-router.put('/:id', (req, res) => {
-  const { id } = req.params;
-  const updateData = req.body;
-  
-  // 這裡應該更新資料庫中的資料
-  
-  res.json({
-    success: true,
-    message: '考題更新成功',
-    data: {
-      id: parseInt(id),
-      ...updateData
+router.put('/:id', async (req, res) => {
+  try {
+    const question = await Question.findByIdAndUpdate(
+      req.params.id,
+      req.body,
+      { new: true, runValidators: true }
+    );
+    
+    if (!question) {
+      return res.status(404).json({
+        success: false,
+        message: '找不到該考題'
+      });
     }
-  });
+    
+    res.json({
+      success: true,
+      message: '考題更新成功',
+      data: question
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: '更新失敗',
+      error: error.message
+    });
+  }
 });
 
 // DELETE - 刪除考題
-router.delete('/:id', (req, res) => {
-  const { id } = req.params;
-  
-  // 這裡應該從資料庫刪除資料
-  
-  res.json({
-    success: true,
-    message: '考題刪除成功',
-    deletedId: parseInt(id)
-  });
+router.delete('/:id', async (req, res) => {
+  try {
+    const question = await Question.findByIdAndDelete(req.params.id);
+    
+    if (!question) {
+      return res.status(404).json({
+        success: false,
+        message: '找不到該考題'
+      });
+    }
+    
+    res.json({
+      success: true,
+      message: '考題刪除成功',
+      deletedId: req.params.id
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: '刪除失敗',
+      error: error.message
+    });
+  }
 });
 
 // POST - 批量匯入考題

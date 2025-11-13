@@ -291,12 +291,11 @@
     // Initialize Lucide Icons
     lucide.createIcons();
 
-    // Mock Data for the table (used in '考題管理')
-    const mockQuestions = [
-        { date: '2025/01/10', course: '數學', chapter: '第3章', knowledge: '微積分', item: '單選題', options: 'A,B,C,D', answer: 'C' },
-        { date: '2025/01/10', course: '歷史', chapter: '第5章', knowledge: '古代文明', item: '連連看', options: '4組', answer: '見圖' },
-        { date: '2025/01/11', course: '科學', chapter: '第1章', knowledge: '物理學', item: '是非題', options: '是,否', answer: '是' },
-    ];
+    // API 基礎 URL（開發時使用本地，部署時改為實際 API 地址）
+    const API_BASE_URL = 'http://localhost:3000/api';
+
+    // 儲存從 API 取得的考題資料
+    let questionsData = [];
 
     const tableBody = document.getElementById('question-table-body');
     const tabButtons = document.querySelectorAll('.tab-button');
@@ -318,10 +317,49 @@
         messageBox.classList.remove('flex');
     });
 
+    // 從 API 取得考題資料
+    async function fetchQuestions(filters = {}) {
+        try {
+            // 建立查詢參數
+            const queryParams = new URLSearchParams();
+            if (filters.course) queryParams.append('course', filters.course);
+            if (filters.knowledge) queryParams.append('knowledge', filters.knowledge);
+            if (filters.chapter) queryParams.append('chapter', filters.chapter);
+            
+            const url = `${API_BASE_URL}/questions${queryParams.toString() ? '?' + queryParams.toString() : ''}`;
+            const response = await fetch(url);
+            const result = await response.json();
+            
+            if (result.success) {
+                questionsData = result.data;
+                renderQuestions();
+                showMessage(`成功載入 ${result.data.length} 筆考題資料`);
+            } else {
+                showMessage('載入考題失敗：' + result.message);
+            }
+        } catch (error) {
+            console.error('API 錯誤:', error);
+            showMessage('連接後端 API 失敗，請確認後端伺服器是否啟動');
+        }
+    }
+
     // Render Table Data for '考題管理' tab
     function renderQuestions() {
         tableBody.innerHTML = ''; // Clear existing rows
-        mockQuestions.forEach((q, index) => {
+        
+        if (questionsData.length === 0) {
+            tableBody.innerHTML = `
+                <tr>
+                    <td colspan="8" class="px-3 py-8 text-center text-gray-500">
+                        <p class="text-lg">暫無考題資料</p>
+                        <p class="text-sm mt-2">請先啟動後端伺服器並執行 npm run seed 初始化資料</p>
+                    </td>
+                </tr>
+            `;
+            return;
+        }
+        
+        questionsData.forEach((q, index) => {
             const row = document.createElement('tr');
             row.className = index % 2 === 0 ? 'bg-white' : 'bg-gray-50';
             
@@ -330,17 +368,17 @@
                 <td class="px-3 py-4 whitespace-nowrap text-sm text-gray-500">${q.course}</td>
                 <td class="px-3 py-4 whitespace-nowrap text-sm text-gray-500">${q.chapter}</td>
                 <td class="px-3 py-4 whitespace-nowrap text-sm text-gray-500">${q.knowledge}</td>
-                <td class="px-3 py-4 whitespace-nowrap text-sm text-gray-500">${q.item}</td>
+                <td class="px-3 py-4 whitespace-nowrap text-sm text-gray-500">${q.type}</td>
                 <td class="px-3 py-4 whitespace-nowrap text-sm text-gray-500">${q.options}</td>
                 <td class="px-3 py-4 whitespace-nowrap text-sm text-gray-500">${q.answer}</td>
                 <td class="px-3 py-4 whitespace-nowrap text-center text-sm font-medium">
                     <div class="flex items-center justify-center space-x-2">
                         <!-- Edit Button -->
-                        <button onclick="handleAction('edit', ${index})" class="text-blue-500 hover:text-blue-700 p-2 rounded-full hover:bg-blue-100 transition">
+                        <button onclick="handleAction('edit', '${q.id}')" class="text-blue-500 hover:text-blue-700 p-2 rounded-full hover:bg-blue-100 transition">
                             <i data-lucide="pencil" class="w-5 h-5"></i>
                         </button>
                         <!-- Delete Button -->
-                        <button onclick="handleAction('delete', ${index})" class="text-red-500 hover:text-red-700 p-2 rounded-full hover:bg-red-100 transition">
+                        <button onclick="handleAction('delete', '${q.id}')" class="text-red-500 hover:text-red-700 p-2 rounded-full hover:bg-red-100 transition">
                             <i data-lucide="trash-2" class="w-5 h-5"></i>
                         </button>
                     </div>
@@ -353,12 +391,30 @@
     }
 
     // Handle Edit/Delete Actions (for '考題管理')
-    window.handleAction = function(action, index) {
-        const question = mockQuestions[index];
+    window.handleAction = async function(action, questionId) {
+        const question = questionsData.find(q => q.id === questionId);
+        if (!question) return;
+        
         if (action === 'edit') {
-            showMessage(`正在編輯：${question.course} - ${question.item} 考題。`);
+            showMessage(`正在編輯：${question.course} - ${question.type} 考題。`);
         } else if (action === 'delete') {
-            showMessage(`確認要刪除：${question.course} - ${question.item} 考題嗎？ (實際操作中需要二次確認)`);
+            if (confirm(`確認要刪除：${question.course} - ${question.type} 考題嗎？`)) {
+                try {
+                    const response = await fetch(`${API_BASE_URL}/questions/${questionId}`, {
+                        method: 'DELETE'
+                    });
+                    const result = await response.json();
+                    
+                    if (result.success) {
+                        showMessage('刪除成功！');
+                        fetchQuestions(); // 重新載入資料
+                    } else {
+                        showMessage('刪除失敗：' + result.message);
+                    }
+                } catch (error) {
+                    showMessage('刪除失敗：' + error.message);
+                }
+            }
         }
     }
 
@@ -386,7 +442,7 @@
             
             // Re-render table when switching back to management (optional, but good practice for dynamic data)
             if (targetTab === 'management') {
-                 renderQuestions(); 
+                fetchQuestions(); // 從 API 載入資料
             }
         });
     });
@@ -396,8 +452,8 @@
         // Set '考題分派' as the initial active tab
         document.querySelector('.tab-button[data-tab="assignment"]').click();
         
-        // This is only called to ensure the icons are created once the elements are in the DOM, 
-        // but 'renderQuestions' is explicitly called inside the tab switching logic for 'management'.
+        // 預先載入考題資料
+        fetchQuestions();
     }
 </script>
 
