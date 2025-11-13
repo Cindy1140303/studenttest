@@ -293,6 +293,15 @@
 
     // API 基礎 URL（開發時使用本地，部署時改為實際 API 地址）
     const API_BASE_URL = 'http://localhost:3000/api';
+    
+    // 備用假資料（當後端無法連接時使用）
+    const mockQuestions = [
+        { id: '1', date: '2025/01/10', course: '數學', chapter: '第3章', knowledge: '微積分', type: '單選題', options: 'A. 2,B. 4,C. 8,D. 16', answer: 'B' },
+        { id: '2', date: '2025/01/10', course: '歷史', chapter: '第5章', knowledge: '古代文明', type: '連連看', options: '4組', answer: '見圖' },
+        { id: '3', date: '2025/01/11', course: '科學', chapter: '第1章', knowledge: '物理學', type: '是非題', options: '是,否', answer: '是' },
+        { id: '4', date: '2025/01/11', course: '數學', chapter: '第1章', knowledge: '代數', type: '單選題', options: 'A. 3,B. 4,C. 5,D. 6', answer: 'B' },
+        { id: '5', date: '2025/01/12', course: '歷史', chapter: '第2章', knowledge: '近代史', type: '單選題', options: 'A. 1912,B. 1914,C. 1916,D. 1918', answer: 'B' }
+    ];
 
     // 儲存從 API 取得的考題資料
     let questionsData = [];
@@ -333,13 +342,15 @@
             if (result.success) {
                 questionsData = result.data;
                 renderQuestions();
-                showMessage(`成功載入 ${result.data.length} 筆考題資料`);
+                console.log(`✅ 成功從後端 API 載入 ${result.data.length} 筆考題資料`);
             } else {
-                showMessage('載入考題失敗：' + result.message);
+                throw new Error(result.message || '載入失敗');
             }
         } catch (error) {
-            console.error('API 錯誤:', error);
-            showMessage('連接後端 API 失敗，請確認後端伺服器是否啟動');
+            console.warn('⚠️ 無法連接後端 API，使用示範資料:', error.message);
+            // 使用備用假資料
+            questionsData = mockQuestions;
+            renderQuestions();
         }
     }
 
@@ -352,7 +363,6 @@
                 <tr>
                     <td colspan="8" class="px-3 py-8 text-center text-gray-500">
                         <p class="text-lg">暫無考題資料</p>
-                        <p class="text-sm mt-2">請先啟動後端伺服器並執行 npm run seed 初始化資料</p>
                     </td>
                 </tr>
             `;
