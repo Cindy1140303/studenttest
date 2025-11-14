@@ -1,14 +1,18 @@
 const express = require('express');
 const cors = require('cors');
 const bodyParser = require('body-parser');
+const mongoose = require('mongoose');
 require('dotenv').config();
 const connectDB = require('./config/database');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Connect to MongoDB
-connectDB();
+// Connect to MongoDB (non-blocking for serverless)
+connectDB().catch(err => {
+  console.error('MongoDB connection failed:', err.message);
+  // 繼續運行，讓 API 可以回應錯誤訊息而非完全崩潰
+});
 
 // Middleware
 app.use(cors());
@@ -31,9 +35,12 @@ app.use('/api/records', recordsRoutes);
 
 // Root endpoint
 app.get('/', (req, res) => {
+  const dbStatus = mongoose.connection.readyState === 1 ? 'connected' : 'disconnected';
   res.json({ 
     message: '考題管理系統 API Server',
     status: 'running',
+    database: dbStatus,
+    timestamp: new Date().toISOString(),
     endpoints: {
       questions: '/api/questions',
       modes: '/api/modes',
