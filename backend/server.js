@@ -31,13 +31,34 @@ app.use('/api/records', recordsRoutes);
 
 // Root endpoint
 app.get('/', (req, res) => {
-  res.json({ message: '考題管理系統 API Server' });
+  res.json({ 
+    message: '考題管理系統 API Server',
+    status: 'running',
+    endpoints: {
+      questions: '/api/questions',
+      modes: '/api/modes',
+      records: '/api/records',
+      assignment: '/api/assignment'
+    }
+  });
 });
 
-// Start server
-app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
+// 404 handler
+app.use((req, res) => {
+  res.status(404).json({ 
+    error: 'Route not found',
+    path: req.url,
+    message: '請檢查 API 路徑是否正確'
+  });
 });
+
+// Don't call app.listen() in Vercel environment
+if (process.env.NODE_ENV !== 'production') {
+  const PORT = process.env.PORT || 3000;
+  app.listen(PORT, () => {
+    console.log(`Server is running on port ${PORT}`);
+  });
+}
 
 // Export for Vercel serverless
 module.exports = app;
