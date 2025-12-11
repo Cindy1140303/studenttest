@@ -108,9 +108,6 @@
                         <div class="relative">
                             <select id="assign-course-select" class="input-style w-48 appearance-none focus:outline-none focus:ring-2 focus:ring-green-500 pr-10">
                                 <option value="">請選擇課程</option>
-                                <option value="math">數學</option>
-                                <option value="history" selected>歷史</option>
-                                <option value="science">科學</option>
                             </select>
                             <i data-lucide="chevron-down" class="text-gray-500 absolute right-2 top-1/2 transform -translate-y-1/2 pointer-events-none w-5 h-5"></i>
                         </div>
@@ -122,23 +119,45 @@
                         <div class="relative">
                             <select id="assign-mode-select" class="input-style w-48 appearance-none focus:outline-none focus:ring-2 focus:ring-green-500 pr-10">
                                 <option value="">請選擇模式</option>
-                                <option value="connect">連連看</option>
-                                <option value="drag">拖拉方塊</option>
-                                <option value="single" selected>單選題</option>
                             </select>
                             <i data-lucide="chevron-down" class="text-gray-500 absolute right-2 top-1/2 transform -translate-y-1/2 pointer-events-none w-5 h-5"></i>
                         </div>
                     </div>
 
                     <!-- Action Button: 確定/預覽 (Confirm/Preview) -->
-                    <button class="action-button bg-gradient-to-r from-orange-400 to-pink-500 hover:from-orange-500 hover:to-pink-600 text-white md:ml-auto whitespace-nowrap">
+                    <button id="confirm-assignment-button" class="action-button bg-gradient-to-r from-orange-400 to-pink-500 hover:from-orange-500 hover:to-pink-600 text-white md:ml-auto whitespace-nowrap">
                         確定/預覽
                     </button>
                 </div>
                 
-                <p class="text-gray-500 p-8 border-4 border-dashed border-gray-200 rounded-xl text-center text-lg font-medium bg-white h-64 flex items-center justify-center">
-                    選擇課程和考題模式後，將在這裡顯示考題分派的詳細預覽介面。
-                </p>
+                <!-- 考題預覽區域 -->
+                <div id="assignment-preview" class="hidden">
+                    <div class="bg-gradient-to-r from-green-50 to-blue-50 p-6 rounded-xl mb-6 border-2 border-green-200">
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="text-2xl font-bold text-gray-800">
+                                <i data-lucide="clipboard-list" class="inline w-6 h-6 mr-2"></i>
+                                考題分派預覽
+                            </h3>
+                            <div class="text-sm text-gray-600">
+                                <span class="font-semibold">課程:</span> <span id="preview-course" class="text-green-600"></span>
+                                <span class="mx-3">|</span>
+                                <span class="font-semibold">模式:</span> <span id="preview-mode" class="text-blue-600"></span>
+                                <span class="mx-3">|</span>
+                                <span class="font-semibold">題數:</span> <span id="preview-count" class="text-purple-600">0</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 考題列表 -->
+                    <div id="assignment-questions-list" class="space-y-4">
+                        <!-- 這裡會動態載入考題 -->
+                    </div>
+                </div>
+
+                <!-- 初始提示 -->
+                <div id="assignment-placeholder" class="text-gray-500 p-8 border-4 border-dashed border-gray-200 rounded-xl text-center text-lg font-medium bg-white h-64 flex items-center justify-center">
+                    選擇課程和考題模式後,點擊「確定/預覽」將顯示符合條件的考題清單
+                </div>
             </div>
 
             
@@ -674,6 +693,164 @@
         }
     });
 
+    // ========== 考題分派功能 ==========
+    let allQuestions = []; // 儲存所有考題
+    let allModes = []; // 儲存所有模式
+
+    // 載入考題分派所需資料
+    async function loadAssignmentData() {
+        try {
+            // 同時載入考題和模式
+            const [questionsRes, modesRes] = await Promise.all([
+                fetch(`${API_BASE_URL}/questions`),
+                fetch(`${API_BASE_URL}/modes`)
+            ]);
+            
+            const questionsData = await questionsRes.json();
+            const modesData = await modesRes.json();
+            
+            if (questionsData.success) {
+                allQuestions = questionsData.data;
+                populateAssignmentCourses();
+            }
+            
+            if (modesData.success) {
+                allModes = modesData.data;
+                populateAssignmentModes();
+            }
+            
+            console.log('✅ 考題分派資料載入完成');
+        } catch (error) {
+            console.warn('⚠️ 無法載入考題分派資料:', error.message);
+        }
+    }
+
+    // 填充課程下拉選單
+    function populateAssignmentCourses() {
+        const courseSelect = document.getElementById('assign-course-select');
+        const courses = [...new Set(allQuestions.map(q => q.course))].filter(Boolean);
+        
+        courseSelect.innerHTML = '<option value="">請選擇課程</option>';
+        courses.forEach(course => {
+            const option = document.createElement('option');
+            option.value = course;
+            option.textContent = course;
+            courseSelect.appendChild(option);
+        });
+    }
+
+    // 填充模式下拉選單
+    function populateAssignmentModes() {
+        const modeSelect = document.getElementById('assign-mode-select');
+        
+        modeSelect.innerHTML = '<option value="">請選擇模式</option>';
+        allModes.forEach(mode => {
+            const option = document.createElement('option');
+            option.value = mode.name;
+            option.textContent = mode.name;
+            modeSelect.appendChild(option);
+        });
+    }
+
+    // 確定/預覽按鈕事件
+    document.getElementById('confirm-assignment-button').addEventListener('click', function() {
+        const selectedCourse = document.getElementById('assign-course-select').value;
+        const selectedMode = document.getElementById('assign-mode-select').value;
+        
+        if (!selectedCourse) {
+            showMessage('⚠️ 請選擇課程');
+            return;
+        }
+        
+        if (!selectedMode) {
+            showMessage('⚠️ 請選擇考題模式');
+            return;
+        }
+        
+        // 篩選符合條件的考題
+        const filteredQuestions = allQuestions.filter(q => 
+            q.course === selectedCourse && q.type === selectedMode
+        );
+        
+        if (filteredQuestions.length === 0) {
+            showMessage(`❌ 沒有找到符合「${selectedCourse} - ${selectedMode}」的考題`);
+            return;
+        }
+        
+        // 顯示考題預覽
+        displayAssignmentPreview(selectedCourse, selectedMode, filteredQuestions);
+    });
+
+    // 顯示考題預覽
+    function displayAssignmentPreview(course, mode, questions) {
+        const placeholder = document.getElementById('assignment-placeholder');
+        const preview = document.getElementById('assignment-preview');
+        const questionsList = document.getElementById('assignment-questions-list');
+        
+        // 隱藏提示,顯示預覽
+        placeholder.classList.add('hidden');
+        preview.classList.remove('hidden');
+        
+        // 更新預覽資訊
+        document.getElementById('preview-course').textContent = course;
+        document.getElementById('preview-mode').textContent = mode;
+        document.getElementById('preview-count').textContent = questions.length;
+        
+        // 渲染考題列表
+        questionsList.innerHTML = '';
+        questions.forEach((q, index) => {
+            const questionCard = document.createElement('div');
+            questionCard.className = 'bg-white p-6 rounded-lg shadow-md border-l-4 border-green-500 hover:shadow-lg transition';
+            
+            questionCard.innerHTML = `
+                <div class="flex items-start justify-between">
+                    <div class="flex-1">
+                        <div class="flex items-center mb-3">
+                            <span class="bg-green-500 text-white px-3 py-1 rounded-full text-sm font-bold mr-3">第 ${index + 1} 題</span>
+                            <span class="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-semibold">${q.type}</span>
+                            ${q.chapter ? `<span class="ml-2 text-gray-500 text-sm">${q.chapter}</span>` : ''}
+                            ${q.knowledge ? `<span class="ml-2 text-gray-500 text-sm">・${q.knowledge}</span>` : ''}
+                        </div>
+                        <div class="text-gray-800 font-medium mb-3 text-lg">${q.content || '題目內容'}</div>
+                        ${q.options ? `
+                            <div class="bg-gray-50 p-4 rounded-lg mb-3">
+                                <div class="text-sm text-gray-600 mb-2 font-semibold">選項：</div>
+                                <div class="text-gray-700">${formatOptions(q.options)}</div>
+                            </div>
+                        ` : ''}
+                        <div class="flex items-center text-sm">
+                            <span class="text-gray-500 mr-2">正確答案：</span>
+                            <span class="bg-green-100 text-green-800 px-3 py-1 rounded font-semibold">${q.answer || '未設定'}</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            questionsList.appendChild(questionCard);
+        });
+        
+        // 重新初始化圖示
+        lucide.createIcons();
+    }
+
+    // 格式化選項顯示
+    function formatOptions(options) {
+        if (!options) return '';
+        
+        // 如果是字串,嘗試分割
+        if (typeof options === 'string') {
+            if (options.includes(',')) {
+                return options.split(',').map((opt, i) => 
+                    `<div class="mb-1">${opt.trim()}</div>`
+                ).join('');
+            }
+            return options;
+        }
+        
+        // 如果是物件或陣列
+        return JSON.stringify(options);
+    }
+
     // Initial Tab Setup: Set '考題分派' as active on load and render questions for '考題管理'
     window.onload = function() {
         // Set '考題分派' as the initial active tab
@@ -681,6 +858,9 @@
         
         // 預先載入考題資料
         fetchQuestions();
+        
+        // 載入考題分派資料
+        loadAssignmentData();
         
         // Initialize all icons
         lucide.createIcons();
