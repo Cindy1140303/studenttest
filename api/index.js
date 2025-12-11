@@ -97,16 +97,29 @@ app.get('/api/questions', async (req, res) => {
 app.post('/api/questions', async (req, res) => {
   try {
     await connectToDatabase();
+    console.log('Received data:', req.body);
+    
+    // 驗證必要欄位
+    if (!req.body.course || !req.body.content) {
+      return res.status(400).json({
+        success: false,
+        message: '缺少必要欄位：course 和 content 為必填',
+        receivedData: req.body
+      });
+    }
+    
     const question = await Question.create(req.body);
     res.status(201).json({
       success: true,
       data: question
     });
   } catch (error) {
+    console.error('Create question error:', error);
     res.status(400).json({
       success: false,
       message: 'Failed to create question',
-      error: error.message
+      error: error.message,
+      details: error.errors || {}
     });
   }
 });
