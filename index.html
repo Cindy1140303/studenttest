@@ -244,13 +244,12 @@
                             <span class="text-2xl font-mono pt-1 text-gray-500 w-8 text-right">1.</span>
                             <div class="flex-grow">
                                 <label class="text-sm font-medium text-gray-600 mb-2 block">HTML/JS/CSS code(VUE)</label>
-                                <textarea class="input-style w-full h-40 focus:outline-none focus:ring-2 focus:ring-orange-500 p-3 text-sm font-mono resize-none" placeholder="在此輸入 VUE 單檔案組件代碼（連連看模式）..."></textarea>
+                                <textarea id="mode-code-1" class="input-style w-full h-40 focus:outline-none focus:ring-2 focus:ring-orange-500 p-3 text-sm font-mono resize-none" placeholder="在此輸入 VUE 單檔案組件代碼（連連看模式）..."></textarea>
                             </div>
                         </div>
                         <div>
                             <label class="text-sm font-medium text-gray-600 mb-2 block">對應模式名稱</label>
-                            <!-- CHANGED to input for flexible naming -->
-                            <input type="text" value="連連看" class="input-style w-full text-lg font-bold text-center py-4 bg-yellow-200 border-yellow-500 text-gray-800 focus:outline-none focus:ring-2 focus:ring-orange-500">
+                            <input id="mode-name-1" type="text" value="連連看" class="input-style w-full text-lg font-bold text-center py-4 bg-yellow-200 border-yellow-500 text-gray-800 focus:outline-none focus:ring-2 focus:ring-orange-500">
                         </div>
                     </div>
 
@@ -260,30 +259,36 @@
                             <span class="text-2xl font-mono pt-1 text-gray-500 w-8 text-right">2.</span>
                             <div class="flex-grow">
                                 <label class="text-sm font-medium text-gray-600 mb-2 block">HTML/JS/CSS code(VUE)</label>
-                                <textarea class="input-style w-full h-40 focus:outline-none focus:ring-2 focus:ring-orange-500 p-3 text-sm font-mono resize-none" placeholder="在此輸入 VUE 單檔案組件代碼（拖拉方塊模式）..."></textarea>
+                                <textarea id="mode-code-2" class="input-style w-full h-40 focus:outline-none focus:ring-2 focus:ring-orange-500 p-3 text-sm font-mono resize-none" placeholder="在此輸入 VUE 單檔案組件代碼（拖拉方塊模式）..."></textarea>
                             </div>
                         </div>
                         <div>
                             <label class="text-sm font-medium text-gray-600 mb-2 block">對應模式名稱</label>
-                            <!-- CHANGED to input for flexible naming -->
-                            <input type="text" value="拖拉方塊" class="input-style w-full text-lg font-bold text-center py-4 bg-yellow-200 border-yellow-500 text-gray-800 focus:outline-none focus:ring-2 focus:ring-orange-500">
+                            <input id="mode-name-2" type="text" value="拖拉方塊" class="input-style w-full text-lg font-bold text-center py-4 bg-yellow-200 border-yellow-500 text-gray-800 focus:outline-none focus:ring-2 focus:ring-orange-500">
                         </div>
                     </div>
                     
-                    <!-- Mode 3: 單選題 (Single Choice) - Note the mockup repeats '1.' here, corrected to '3.' -->
+                    <!-- Mode 3: 單選題 (Single Choice) -->
                     <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start p-4 border border-gray-200 rounded-xl bg-gray-50">
                         <div class="flex items-start space-x-4">
                             <span class="text-2xl font-mono pt-1 text-gray-500 w-8 text-right">3.</span>
                             <div class="flex-grow">
                                 <label class="text-sm font-medium text-gray-600 mb-2 block">HTML/JS/CSS code(VUE)</label>
-                                <textarea class="input-style w-full h-40 focus:outline-none focus:ring-2 focus:ring-orange-500 p-3 text-sm font-mono resize-none" placeholder="在此輸入 VUE 單檔案組件代碼（單選題模式）..."></textarea>
+                                <textarea id="mode-code-3" class="input-style w-full h-40 focus:outline-none focus:ring-2 focus:ring-orange-500 p-3 text-sm font-mono resize-none" placeholder="在此輸入 VUE 單檔案組件代碼（單選題模式）..."></textarea>
                             </div>
                         </div>
                         <div>
                             <label class="text-sm font-medium text-gray-600 mb-2 block">對應模式名稱</label>
-                            <!-- CHANGED to input for flexible naming -->
-                            <input type="text" value="單選題" class="input-style w-full text-lg font-bold text-center py-4 bg-yellow-200 border-yellow-500 text-gray-800 focus:outline-none focus:ring-2 focus:ring-orange-500">
+                            <input id="mode-name-3" type="text" value="單選題" class="input-style w-full text-lg font-bold text-center py-4 bg-yellow-200 border-yellow-500 text-gray-800 focus:outline-none focus:ring-2 focus:ring-orange-500">
                         </div>
+                    </div>
+
+                    <!-- 儲存按鈕 -->
+                    <div class="flex justify-center mt-8">
+                        <button id="save-modes-button" class="action-button bg-gradient-to-r from-orange-400 to-pink-500 hover:from-orange-500 hover:to-pink-600 text-white px-12 py-4 text-lg">
+                            <i data-lucide="save" class="inline w-5 h-5 mr-2"></i>
+                            儲存所有模式
+                        </button>
                     </div>
                 </div>
             </div>
@@ -851,6 +856,93 @@
         return JSON.stringify(options);
     }
 
+    // ========== 模式管理功能 ==========
+    
+    // 載入已儲存的模式資料
+    async function loadModes() {
+        try {
+            const response = await fetch(`${API_BASE_URL}/modes`);
+            const result = await response.json();
+            
+            if (result.success && result.data.length > 0) {
+                result.data.forEach((mode, index) => {
+                    const modeNum = index + 1;
+                    const nameInput = document.getElementById(`mode-name-${modeNum}`);
+                    const codeInput = document.getElementById(`mode-code-${modeNum}`);
+                    
+                    if (nameInput && mode.name) {
+                        nameInput.value = mode.name;
+                    }
+                    if (codeInput && mode.code) {
+                        codeInput.value = mode.code;
+                    }
+                });
+                console.log('✅ 已載入模式資料');
+            }
+        } catch (error) {
+            console.warn('⚠️ 無法載入模式資料:', error.message);
+        }
+    }
+
+    // 儲存模式按鈕事件
+    document.getElementById('save-modes-button').addEventListener('click', async function() {
+        const modes = [];
+        
+        // 收集所有模式資料
+        for (let i = 1; i <= 3; i++) {
+            const name = document.getElementById(`mode-name-${i}`).value.trim();
+            const code = document.getElementById(`mode-code-${i}`).value.trim();
+            
+            if (name) {
+                modes.push({
+                    name: name,
+                    code: code || '',
+                    description: `${name}模式`,
+                    order: i
+                });
+            }
+        }
+        
+        if (modes.length === 0) {
+            showMessage('⚠️ 請至少填寫一個模式名稱');
+            return;
+        }
+        
+        try {
+            // 先刪除所有現有模式,再批次新增
+            const deleteResponse = await fetch(`${API_BASE_URL}/modes`, {
+                method: 'DELETE'
+            });
+            
+            // 批次新增模式
+            const savePromises = modes.map(mode => 
+                fetch(`${API_BASE_URL}/modes`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(mode)
+                })
+            );
+            
+            const responses = await Promise.all(savePromises);
+            const results = await Promise.all(responses.map(r => r.json()));
+            
+            const successCount = results.filter(r => r.success).length;
+            
+            if (successCount > 0) {
+                showMessage(`✅ 成功儲存 ${successCount} 個模式！`);
+                // 重新載入考題分派的模式選單
+                loadAssignmentData();
+            } else {
+                showMessage('❌ 儲存失敗，請稍後再試');
+            }
+        } catch (error) {
+            showMessage('❌ 儲存失敗：' + error.message);
+            console.error('儲存模式錯誤:', error);
+        }
+    });
+
     // Initial Tab Setup: Set '考題分派' as active on load and render questions for '考題管理'
     window.onload = function() {
         // Set '考題分派' as the initial active tab
@@ -861,6 +953,9 @@
         
         // 載入考題分派資料
         loadAssignmentData();
+        
+        // 載入模式管理資料
+        loadModes();
         
         // Initialize all icons
         lucide.createIcons();

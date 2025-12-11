@@ -177,7 +177,7 @@ app.delete('/api/questions/:id', async (req, res) => {
 app.get('/api/modes', async (req, res) => {
   try {
     await connectToDatabase();
-    const modes = await Mode.find();
+    const modes = await Mode.find().sort({ order: 1 });
     res.json({
       success: true,
       count: modes.length,
@@ -187,6 +187,58 @@ app.get('/api/modes', async (req, res) => {
     res.status(500).json({
       success: false,
       message: 'Failed to fetch modes',
+      error: error.message
+    });
+  }
+});
+
+app.post('/api/modes', async (req, res) => {
+  try {
+    await connectToDatabase();
+    const { name, code, description, order } = req.body;
+    
+    if (!name) {
+      return res.status(400).json({
+        success: false,
+        message: '模式名稱為必填'
+      });
+    }
+    
+    const mode = new Mode({
+      name,
+      code: code || '',
+      description: description || name,
+      order: order || 0
+    });
+    
+    await mode.save();
+    
+    res.status(201).json({
+      success: true,
+      message: 'Mode created successfully',
+      data: mode
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: 'Failed to create mode',
+      error: error.message
+    });
+  }
+});
+
+app.delete('/api/modes', async (req, res) => {
+  try {
+    await connectToDatabase();
+    await Mode.deleteMany({});
+    res.json({
+      success: true,
+      message: 'All modes deleted successfully'
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: 'Failed to delete modes',
       error: error.message
     });
   }
