@@ -365,6 +365,63 @@
             </div>
         </div>
 
+        <!-- 編輯考題表單 -->
+        <div id="edit-question-modal" class="fixed inset-0 bg-gray-900 bg-opacity-50 hidden items-center justify-center z-50">
+            <div class="bg-white p-8 rounded-lg shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+                <h3 class="text-2xl font-bold mb-6 text-gray-800">編輯考題</h3>
+                <form id="edit-question-form" class="space-y-4">
+                    <input type="hidden" id="edit-question-id">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">課別 *</label>
+                            <input type="text" id="edit-course" required class="input-style w-full" placeholder="例如：數學">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">章節 *</label>
+                            <input type="text" id="edit-chapter" required class="input-style w-full" placeholder="例如：第1章">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">知識點 *</label>
+                        <input type="text" id="edit-knowledge" required class="input-style w-full" placeholder="例如：代數">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">題型 *</label>
+                        <select id="edit-type" required class="input-style w-full">
+                            <option value="">請選擇題型</option>
+                            <option value="單選題">單選題</option>
+                            <option value="多選題">多選題</option>
+                            <option value="是非題">是非題</option>
+                            <option value="填空題">填空題</option>
+                            <option value="連連看">連連看</option>
+                            <option value="拖拉方塊">拖拉方塊</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">題目內容 *</label>
+                        <textarea id="edit-content" required class="input-style w-full h-24" placeholder="請輸入題目內容"></textarea>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">選項 *</label>
+                        <input type="text" id="edit-options" required class="input-style w-full" placeholder="例如：A. 選項1,B. 選項2,C. 選項3,D. 選項4">
+                        <p class="text-xs text-gray-500 mt-1">多個選項請用逗號分隔</p>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">答案 *</label>
+                        <input type="text" id="edit-answer" required class="input-style w-full" placeholder="例如：B">
+                    </div>
+                    <div class="flex space-x-3 pt-4">
+                        <button type="submit" class="flex-1 bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg font-semibold">
+                            確定更新
+                        </button>
+                        <button type="button" id="cancel-edit-button" class="flex-1 bg-gray-300 hover:bg-gray-400 text-gray-700 px-4 py-2 rounded-lg font-semibold">
+                            取消
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
         <!-- Excel 匯入表單 -->
         <div id="import-modal" class="fixed inset-0 bg-gray-900 bg-opacity-50 hidden items-center justify-center z-50">
             <div class="bg-white p-8 rounded-lg shadow-2xl max-w-lg w-full">
@@ -482,23 +539,24 @@
         questionsData.forEach((q, index) => {
             const row = document.createElement('tr');
             row.className = index % 2 === 0 ? 'bg-white' : 'bg-gray-50';
+            const questionId = q._id || q.id;
             
             row.innerHTML = `
-                <td class="px-3 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${q.date}</td>
+                <td class="px-3 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${q.date || '未設定'}</td>
                 <td class="px-3 py-4 whitespace-nowrap text-sm text-gray-500">${q.course}</td>
-                <td class="px-3 py-4 whitespace-nowrap text-sm text-gray-500">${q.chapter}</td>
-                <td class="px-3 py-4 whitespace-nowrap text-sm text-gray-500">${q.knowledge}</td>
+                <td class="px-3 py-4 whitespace-nowrap text-sm text-gray-500">${q.chapter || '-'}</td>
+                <td class="px-3 py-4 whitespace-nowrap text-sm text-gray-500">${q.knowledge || '-'}</td>
                 <td class="px-3 py-4 whitespace-nowrap text-sm text-gray-500">${q.type}</td>
-                <td class="px-3 py-4 whitespace-nowrap text-sm text-gray-500">${q.options}</td>
+                <td class="px-3 py-4 whitespace-nowrap text-sm text-gray-500">${q.options || '-'}</td>
                 <td class="px-3 py-4 whitespace-nowrap text-sm text-gray-500">${q.answer}</td>
                 <td class="px-3 py-4 whitespace-nowrap text-center text-sm font-medium">
                     <div class="flex items-center justify-center space-x-2">
                         <!-- Edit Button -->
-                        <button onclick="handleAction('edit', '${q.id}')" class="text-blue-500 hover:text-blue-700 p-2 rounded-full hover:bg-blue-100 transition">
+                        <button onclick="handleAction('edit', '${questionId}')" class="text-blue-500 hover:text-blue-700 p-2 rounded-full hover:bg-blue-100 transition">
                             <i data-lucide="pencil" class="w-5 h-5"></i>
                         </button>
                         <!-- Delete Button -->
-                        <button onclick="handleAction('delete', '${q.id}')" class="text-red-500 hover:text-red-700 p-2 rounded-full hover:bg-red-100 transition">
+                        <button onclick="handleAction('delete', '${questionId}')" class="text-red-500 hover:text-red-700 p-2 rounded-full hover:bg-red-100 transition">
                             <i data-lucide="trash-2" class="w-5 h-5"></i>
                         </button>
                     </div>
@@ -512,11 +570,12 @@
 
     // Handle Edit/Delete Actions (for '考題管理')
     window.handleAction = async function(action, questionId) {
-        const question = questionsData.find(q => q.id === questionId);
+        const question = questionsData.find(q => q.id === questionId || q._id === questionId);
         if (!question) return;
         
         if (action === 'edit') {
-            showMessage(`正在編輯：${question.course} - ${question.type} 考題。`);
+            // 開啟編輯視窗並填入資料
+            openEditModal(question);
         } else if (action === 'delete') {
             if (confirm(`確認要刪除：${question.course} - ${question.type} 考題嗎？`)) {
                 try {
@@ -537,6 +596,72 @@
             }
         }
     }
+
+    // 開啟編輯視窗
+    function openEditModal(question) {
+        const editModal = document.getElementById('edit-question-modal');
+        
+        // 填入現有資料
+        document.getElementById('edit-question-id').value = question._id || question.id;
+        document.getElementById('edit-course').value = question.course || '';
+        document.getElementById('edit-chapter').value = question.chapter || '';
+        document.getElementById('edit-knowledge').value = question.knowledge || '';
+        document.getElementById('edit-type').value = question.type || '';
+        document.getElementById('edit-content').value = question.content || '';
+        document.getElementById('edit-options').value = question.options || '';
+        document.getElementById('edit-answer').value = question.answer || '';
+        
+        editModal.classList.remove('hidden');
+        editModal.classList.add('flex');
+    }
+
+    // 編輯表單提交
+    const editQuestionForm = document.getElementById('edit-question-form');
+    editQuestionForm.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        const questionId = document.getElementById('edit-question-id').value;
+        const questionData = {
+            course: document.getElementById('edit-course').value,
+            chapter: document.getElementById('edit-chapter').value,
+            knowledge: document.getElementById('edit-knowledge').value,
+            type: document.getElementById('edit-type').value,
+            content: document.getElementById('edit-content').value,
+            options: document.getElementById('edit-options').value,
+            answer: document.getElementById('edit-answer').value
+        };
+        
+        try {
+            const response = await fetch(`${API_BASE_URL}/questions/${questionId}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(questionData)
+            });
+            
+            const result = await response.json();
+            
+            if (result.success) {
+                showMessage('✅ 考題更新成功！');
+                editModal.classList.add('hidden');
+                editModal.classList.remove('flex');
+                fetchQuestions(); // 重新載入資料
+            } else {
+                showMessage('❌ 更新失敗：' + result.message);
+            }
+        } catch (error) {
+            showMessage('❌ 更新失敗：' + error.message);
+        }
+    });
+
+    // 取消編輯按鈕
+    const cancelEditBtn = document.getElementById('cancel-edit-button');
+    const editModal = document.getElementById('edit-question-modal');
+    cancelEditBtn.addEventListener('click', function() {
+        editModal.classList.add('hidden');
+        editModal.classList.remove('flex');
+    });
 
     // Tab Switching Logic
     tabButtons.forEach(button => {
