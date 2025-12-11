@@ -1041,7 +1041,7 @@
                         ${q.options ? `
                             <div class="bg-gray-50 p-4 rounded-lg mb-3">
                                 <div class="text-sm text-gray-600 mb-2 font-semibold">選項：</div>
-                                <div class="text-gray-700">${formatOptions(q.options)}</div>
+                                <div class="text-gray-700">${formatOptions(q.options, q.type)}</div>
                             </div>
                         ` : ''}
                         <div class="flex items-center text-sm">
@@ -1060,16 +1060,71 @@
     }
 
     // 格式化選項顯示
-    function formatOptions(options) {
+    function formatOptions(options, questionType) {
         if (!options) return '';
         
-        // 如果是字串,嘗試分割
+        // 如果是字串
         if (typeof options === 'string') {
-            if (options.includes(',')) {
-                return options.split(',').map((opt, i) => 
-                    `<div class="mb-1">${opt.trim()}</div>`
+            // 連連看格式: 使用 | 分隔的配對
+            if (questionType === '連連看' && options.includes('|')) {
+                const pairs = options.split('\n').filter(line => line.trim());
+                return `
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="bg-purple-50 p-3 rounded">
+                            <div class="text-xs font-semibold text-purple-600 mb-2">左側項目</div>
+                            ${pairs.map(pair => {
+                                const [left] = pair.split('|');
+                                return `<div class="bg-white px-3 py-2 rounded mb-2 border border-purple-200">${left.trim()}</div>`;
+                            }).join('')}
+                        </div>
+                        <div class="bg-blue-50 p-3 rounded">
+                            <div class="text-xs font-semibold text-blue-600 mb-2">右側項目</div>
+                            ${pairs.map(pair => {
+                                const parts = pair.split('|');
+                                const right = parts[1] || '';
+                                return `<div class="bg-white px-3 py-2 rounded mb-2 border border-blue-200">${right.trim()}</div>`;
+                            }).join('')}
+                        </div>
+                    </div>
+                    <div class="mt-2 text-xs text-gray-500 italic">
+                        💡 學生需要將左側項目連接到對應的右側項目
+                    </div>
+                `;
+            }
+            
+            // 拖拉方塊格式
+            if (questionType === '拖拉方塊' && options.includes('|')) {
+                const items = options.split('\n').filter(line => line.trim());
+                return items.map(item => {
+                    const [block, target] = item.split('|');
+                    return `
+                        <div class="flex items-center mb-2">
+                            <div class="bg-yellow-100 px-3 py-2 rounded border-2 border-yellow-400 font-medium mr-3">
+                                ${block.trim()}
+                            </div>
+                            <span class="text-gray-400 mx-2">→</span>
+                            <div class="bg-green-100 px-3 py-2 rounded border-2 border-green-400">
+                                ${target.trim()}
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            }
+            
+            // 一般選項格式(用換行分隔)
+            if (options.includes('\n')) {
+                return options.split('\n').filter(line => line.trim()).map(opt => 
+                    `<div class="mb-1 pl-3 border-l-2 border-gray-300">${opt.trim()}</div>`
                 ).join('');
             }
+            
+            // 逗號分隔格式(舊格式相容)
+            if (options.includes(',')) {
+                return options.split(',').map(opt => 
+                    `<div class="mb-1 pl-3 border-l-2 border-gray-300">${opt.trim()}</div>`
+                ).join('');
+            }
+            
             return options;
         }
         
