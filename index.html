@@ -344,14 +344,18 @@
                         <label class="block text-sm font-medium text-gray-700 mb-2">題目內容 *</label>
                         <textarea id="new-content" required class="input-style w-full h-24" placeholder="請輸入題目內容"></textarea>
                     </div>
-                    <div>
+                    <div id="new-options-container">
                         <label class="block text-sm font-medium text-gray-700 mb-2">選項 *</label>
-                        <input type="text" id="new-options" required class="input-style w-full" placeholder="例如：A. 選項1,B. 選項2,C. 選項3,D. 選項4">
-                        <p class="text-xs text-gray-500 mt-1">多個選項請用逗號分隔</p>
+                        <textarea id="new-options" required class="input-style w-full h-32 font-mono text-sm" placeholder="等待選擇題型..."></textarea>
+                        <div id="new-options-help" class="text-xs text-gray-500 mt-2 bg-blue-50 p-3 rounded">
+                            <p class="font-semibold mb-1">📌 格式說明:</p>
+                            <p id="new-format-hint">請先選擇題型</p>
+                        </div>
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-2">答案 *</label>
                         <input type="text" id="new-answer" required class="input-style w-full" placeholder="例如：B">
+                        <p id="new-answer-help" class="text-xs text-gray-500 mt-1"></p>
                     </div>
                     <div class="flex space-x-3 pt-4">
                         <button type="submit" class="flex-1 bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg font-semibold">
@@ -401,14 +405,18 @@
                         <label class="block text-sm font-medium text-gray-700 mb-2">題目內容 *</label>
                         <textarea id="edit-content" required class="input-style w-full h-24" placeholder="請輸入題目內容"></textarea>
                     </div>
-                    <div>
+                    <div id="edit-options-container">
                         <label class="block text-sm font-medium text-gray-700 mb-2">選項 *</label>
-                        <input type="text" id="edit-options" required class="input-style w-full" placeholder="例如：A. 選項1,B. 選項2,C. 選項3,D. 選項4">
-                        <p class="text-xs text-gray-500 mt-1">多個選項請用逗號分隔</p>
+                        <textarea id="edit-options" required class="input-style w-full h-32 font-mono text-sm" placeholder="等待選擇題型..."></textarea>
+                        <div id="edit-options-help" class="text-xs text-gray-500 mt-2 bg-blue-50 p-3 rounded">
+                            <p class="font-semibold mb-1">📌 格式說明:</p>
+                            <p id="edit-format-hint">請先選擇題型</p>
+                        </div>
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-2">答案 *</label>
                         <input type="text" id="edit-answer" required class="input-style w-full" placeholder="例如：B">
+                        <p id="edit-answer-help" class="text-xs text-gray-500 mt-1"></p>
                     </div>
                     <div class="flex space-x-3 pt-4">
                         <button type="submit" class="flex-1 bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg font-semibold">
@@ -703,6 +711,94 @@
         
         fetchQuestions(filters);
         showMessage('查詢中...');
+    });
+
+    // ========== 題型格式說明 ==========
+    const questionTypeFormats = {
+        '單選題': {
+            optionsPlaceholder: 'A. 選項1\nB. 選項2\nC. 選項3\nD. 選項4',
+            optionsHint: '單選題: 每行一個選項，格式為「選項編號. 內容」',
+            answerHint: '填入正確選項的編號，例如: A 或 B'
+        },
+        '多選題': {
+            optionsPlaceholder: 'A. 選項1\nB. 選項2\nC. 選項3\nD. 選項4',
+            optionsHint: '多選題: 每行一個選項，格式為「選項編號. 內容」',
+            answerHint: '填入所有正確選項，用逗號分隔，例如: A,C'
+        },
+        '是非題': {
+            optionsPlaceholder: 'A. 是\nB. 否',
+            optionsHint: '是非題: 固定為「是」和「否」兩個選項',
+            answerHint: '填入 A 或 B'
+        },
+        '填空題': {
+            optionsPlaceholder: '(可留空或填入提示)',
+            optionsHint: '填空題: 可不填選項，或填入答案提示',
+            answerHint: '填入標準答案'
+        },
+        '連連看': {
+            optionsPlaceholder: '蘋果|Apple\n香蕉|Banana\n貓|Cat\n狗|Dog',
+            optionsHint: '連連看: 每行一組配對，用「|」符號分隔左右兩側，例如: 中文|英文',
+            answerHint: '填入 auto (系統自動驗證配對正確性)'
+        },
+        '拖拉方塊': {
+            optionsPlaceholder: '方塊1內容|目標位置1\n方塊2內容|目標位置2',
+            optionsHint: '拖拉方塊: 每行一組，用「|」分隔方塊內容和目標位置',
+            answerHint: '填入 auto (系統自動驗證)'
+        }
+    };
+
+    // 更新題型格式提示（新增表單）
+    document.getElementById('new-type').addEventListener('change', function() {
+        const selectedType = this.value;
+        const optionsField = document.getElementById('new-options');
+        const formatHint = document.getElementById('new-format-hint');
+        const answerHelp = document.getElementById('new-answer-help');
+        const answerField = document.getElementById('new-answer');
+        
+        if (selectedType && questionTypeFormats[selectedType]) {
+            const format = questionTypeFormats[selectedType];
+            optionsField.placeholder = format.optionsPlaceholder;
+            formatHint.textContent = format.optionsHint;
+            answerHelp.textContent = format.answerHint;
+            
+            // 為連連看和拖拉方塊自動填入 auto
+            if (selectedType === '連連看' || selectedType === '拖拉方塊') {
+                answerField.value = 'auto';
+            } else {
+                answerField.value = '';
+            }
+        } else {
+            optionsField.placeholder = '請先選擇題型';
+            formatHint.textContent = '請先選擇題型';
+            answerHelp.textContent = '';
+        }
+    });
+
+    // 更新題型格式提示（編輯表單）
+    document.getElementById('edit-type').addEventListener('change', function() {
+        const selectedType = this.value;
+        const optionsField = document.getElementById('edit-options');
+        const formatHint = document.getElementById('edit-format-hint');
+        const answerHelp = document.getElementById('edit-answer-help');
+        const answerField = document.getElementById('edit-answer');
+        
+        if (selectedType && questionTypeFormats[selectedType]) {
+            const format = questionTypeFormats[selectedType];
+            optionsField.placeholder = format.optionsPlaceholder;
+            formatHint.textContent = format.optionsHint;
+            answerHelp.textContent = format.answerHint;
+            
+            // 為連連看和拖拉方塊自動填入 auto
+            if (selectedType === '連連看' || selectedType === '拖拉方塊') {
+                if (!answerField.value || answerField.value === '') {
+                    answerField.value = 'auto';
+                }
+            }
+        } else {
+            optionsField.placeholder = '請先選擇題型';
+            formatHint.textContent = '請先選擇題型';
+            answerHelp.textContent = '';
+        }
     });
 
     // ========== 新功能：手動新增按鈕 ==========
