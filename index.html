@@ -241,7 +241,10 @@
                     <!-- Mode 1: 連連看 (Connect-the-Dots) -->
                     <div class="mode-block grid grid-cols-1 lg:grid-cols-2 gap-8 items-start p-4 border border-gray-200 rounded-xl bg-gray-50" data-mode-index="1">
                         <div class="flex items-start space-x-4">
-                            <span class="text-2xl font-mono pt-1 text-gray-500 w-8 text-right">1.</span>
+                            <div class="flex flex-col items-center w-8">
+                                <span class="text-2xl font-mono text-gray-500">1.</span>
+                                <input type="checkbox" class="mode-checkbox mt-2 w-5 h-5 cursor-pointer" data-mode-index="1">
+                            </div>
                             <div class="flex-grow">
                                 <label class="text-sm font-medium text-gray-600 mb-2 block">HTML/JS/CSS code(VUE)</label>
                                 <textarea id="mode-code-1" class="input-style w-full h-40 focus:outline-none focus:ring-2 focus:ring-orange-500 p-3 text-sm font-mono resize-none" placeholder="在此輸入 VUE 單檔案組件代碼（連連看模式）..."></textarea>
@@ -256,7 +259,10 @@
                     <!-- Mode 2: 拖拉方塊 (Drag Blocks) -->
                     <div class="mode-block grid grid-cols-1 lg:grid-cols-2 gap-8 items-start p-4 border border-gray-200 rounded-xl bg-gray-50" data-mode-index="2">
                         <div class="flex items-start space-x-4">
-                            <span class="text-2xl font-mono pt-1 text-gray-500 w-8 text-right">2.</span>
+                            <div class="flex flex-col items-center w-8">
+                                <span class="text-2xl font-mono text-gray-500">2.</span>
+                                <input type="checkbox" class="mode-checkbox mt-2 w-5 h-5 cursor-pointer" data-mode-index="2">
+                            </div>
                             <div class="flex-grow">
                                 <label class="text-sm font-medium text-gray-600 mb-2 block">HTML/JS/CSS code(VUE)</label>
                                 <textarea id="mode-code-2" class="input-style w-full h-40 focus:outline-none focus:ring-2 focus:ring-orange-500 p-3 text-sm font-mono resize-none" placeholder="在此輸入 VUE 單檔案組件代碼（拖拉方塊模式）..."></textarea>
@@ -271,7 +277,10 @@
                     <!-- Mode 3: 單選題 (Single Choice) -->
                     <div class="mode-block grid grid-cols-1 lg:grid-cols-2 gap-8 items-start p-4 border border-gray-200 rounded-xl bg-gray-50" data-mode-index="3">
                         <div class="flex items-start space-x-4">
-                            <span class="text-2xl font-mono pt-1 text-gray-500 w-8 text-right">3.</span>
+                            <div class="flex flex-col items-center w-8">
+                                <span class="text-2xl font-mono text-gray-500">3.</span>
+                                <input type="checkbox" class="mode-checkbox mt-2 w-5 h-5 cursor-pointer" data-mode-index="3">
+                            </div>
                             <div class="flex-grow">
                                 <label class="text-sm font-medium text-gray-600 mb-2 block">HTML/JS/CSS code(VUE)</label>
                                 <textarea id="mode-code-3" class="input-style w-full h-40 focus:outline-none focus:ring-2 focus:ring-orange-500 p-3 text-sm font-mono resize-none" placeholder="在此輸入 VUE 單檔案組件代碼（單選題模式）..."></textarea>
@@ -286,7 +295,10 @@
                     <!-- Mode 4: 多選題 (Multiple Choice) -->
                     <div class="mode-block grid grid-cols-1 lg:grid-cols-2 gap-8 items-start p-4 border border-gray-200 rounded-xl bg-gray-50" data-mode-index="4">
                         <div class="flex items-start space-x-4">
-                            <span class="text-2xl font-mono pt-1 text-gray-500 w-8 text-right">4.</span>
+                            <div class="flex flex-col items-center w-8">
+                                <span class="text-2xl font-mono text-gray-500">4.</span>
+                                <input type="checkbox" class="mode-checkbox mt-2 w-5 h-5 cursor-pointer" data-mode-index="4">
+                            </div>
                             <div class="flex-grow">
                                 <label class="text-sm font-medium text-gray-600 mb-2 block">HTML/JS/CSS code(VUE)</label>
                                 <textarea id="mode-code-4" class="input-style w-full h-40 focus:outline-none focus:ring-2 focus:ring-orange-500 p-3 text-sm font-mono resize-none" placeholder="在此輸入 VUE 單檔案組件代碼（多選題模式）..."></textarea>
@@ -301,7 +313,10 @@
                     <!-- Mode 5: 是非題 (True/False) -->
                     <div class="mode-block grid grid-cols-1 lg:grid-cols-2 gap-8 items-start p-4 border border-gray-200 rounded-xl bg-gray-50" data-mode-index="5">
                         <div class="flex items-start space-x-4">
-                            <span class="text-2xl font-mono pt-1 text-gray-500 w-8 text-right">5.</span>
+                            <div class="flex flex-col items-center w-8">
+                                <span class="text-2xl font-mono text-gray-500">5.</span>
+                                <input type="checkbox" class="mode-checkbox mt-2 w-5 h-5 cursor-pointer" data-mode-index="5">
+                            </div>
                             <div class="flex-grow">
                                 <label class="text-sm font-medium text-gray-600 mb-2 block">HTML/JS/CSS code(VUE)</label>
                                 <textarea id="mode-code-5" class="input-style w-full h-40 focus:outline-none focus:ring-2 focus:ring-orange-500 p-3 text-sm font-mono resize-none" placeholder="在此輸入 VUE 單檔案組件代碼（是非題模式）..."></textarea>
@@ -316,7 +331,10 @@
                     <!-- Mode 6: 填空題 (Fill in the Blank) -->
                     <div class="mode-block grid grid-cols-1 lg:grid-cols-2 gap-8 items-start p-4 border border-gray-200 rounded-xl bg-gray-50" data-mode-index="6">
                         <div class="flex items-start space-x-4">
-                            <span class="text-2xl font-mono pt-1 text-gray-500 w-8 text-right">6.</span>
+                            <div class="flex flex-col items-center w-8">
+                                <span class="text-2xl font-mono text-gray-500">6.</span>
+                                <input type="checkbox" class="mode-checkbox mt-2 w-5 h-5 cursor-pointer" data-mode-index="6">
+                            </div>
                             <div class="flex-grow">
                                 <label class="text-sm font-medium text-gray-600 mb-2 block">HTML/JS/CSS code(VUE)</label>
                                 <textarea id="mode-code-6" class="input-style w-full h-40 focus:outline-none focus:ring-2 focus:ring-orange-500 p-3 text-sm font-mono resize-none" placeholder="在此輸入 VUE 單檔案組件代碼（填空題模式）..."></textarea>
@@ -328,16 +346,35 @@
                         </div>
                     </div>
 
-                    <!-- 新增和儲存按鈕 -->
-                    <div class="flex justify-center gap-4 mt-8">
-                        <button id="add-mode-button" class="action-button bg-gradient-to-r from-green-400 to-teal-500 hover:from-green-500 hover:to-teal-600 text-white px-8 py-4 text-lg">
-                            <i data-lucide="plus-circle" class="inline w-5 h-5 mr-2"></i>
-                            新增模式
-                        </button>
-                        <button id="save-modes-button" class="action-button bg-gradient-to-r from-orange-400 to-pink-500 hover:from-orange-500 hover:to-pink-600 text-white px-12 py-4 text-lg">
-                            <i data-lucide="save" class="inline w-5 h-5 mr-2"></i>
-                            儲存所有模式
-                        </button>
+                    <!-- 操作按鈕區 -->
+                    <div class="mt-8 space-y-4">
+                        <!-- 選擇操作 -->
+                        <div class="flex justify-center gap-3">
+                            <button id="select-all-modes-button" class="px-6 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition text-sm">
+                                <i data-lucide="check-square" class="inline w-4 h-4 mr-1"></i>
+                                全選
+                            </button>
+                            <button id="deselect-all-modes-button" class="px-6 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition text-sm">
+                                <i data-lucide="square" class="inline w-4 h-4 mr-1"></i>
+                                取消全選
+                            </button>
+                            <button id="delete-selected-modes-button" class="px-6 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition text-sm">
+                                <i data-lucide="trash-2" class="inline w-4 h-4 mr-1"></i>
+                                刪除已選
+                            </button>
+                        </div>
+                        
+                        <!-- 主要操作 -->
+                        <div class="flex justify-center gap-4">
+                            <button id="add-mode-button" class="action-button bg-gradient-to-r from-green-400 to-teal-500 hover:from-green-500 hover:to-teal-600 text-white px-8 py-4 text-lg">
+                                <i data-lucide="plus-circle" class="inline w-5 h-5 mr-2"></i>
+                                新增模式
+                            </button>
+                            <button id="save-modes-button" class="action-button bg-gradient-to-r from-orange-400 to-pink-500 hover:from-orange-500 hover:to-pink-600 text-white px-12 py-4 text-lg">
+                                <i data-lucide="save" class="inline w-5 h-5 mr-2"></i>
+                                儲存所有模式
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -1703,7 +1740,10 @@
         
         modeBlock.innerHTML = `
             <div class="flex items-start space-x-4">
-                <span class="text-2xl font-mono pt-1 text-gray-500 w-8 text-right">${index}.</span>
+                <div class="flex flex-col items-center w-8">
+                    <span class="text-2xl font-mono text-gray-500">${index}.</span>
+                    <input type="checkbox" class="mode-checkbox mt-2 w-5 h-5 cursor-pointer" data-mode-index="${index}">
+                </div>
                 <div class="flex-grow">
                     <label class="text-sm font-medium text-gray-600 mb-2 block">HTML/JS/CSS code(VUE)</label>
                     <textarea id="mode-code-${index}" class="input-style w-full h-40 focus:outline-none focus:ring-2 focus:ring-orange-500 p-3 text-sm font-mono resize-none" placeholder="在此輸入 VUE 單檔案組件代碼...">${code}</textarea>
@@ -1712,17 +1752,52 @@
             <div>
                 <label class="text-sm font-medium text-gray-600 mb-2 block">對應模式名稱</label>
                 <input id="mode-name-${index}" type="text" value="${name}" class="input-style w-full text-lg font-bold text-center py-4 bg-yellow-200 border-yellow-500 text-gray-800 focus:outline-none focus:ring-2 focus:ring-orange-500" placeholder="請輸入模式名稱">
-                ${index > 6 ? `
-                    <button type="button" onclick="removeModeBlock(${index})" class="mt-3 w-full px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition text-sm">
-                        <i data-lucide="trash-2" class="inline w-4 h-4 mr-1"></i>
-                        刪除此模式
-                    </button>
-                ` : ''}
             </div>
         `;
         
         return modeBlock;
     }
+    
+    // 全選按鈕事件
+    document.getElementById('select-all-modes-button').addEventListener('click', function() {
+        const checkboxes = document.querySelectorAll('.mode-checkbox');
+        checkboxes.forEach(cb => cb.checked = true);
+        showMessage(`✅ 已全選 ${checkboxes.length} 個模式`, 'success');
+    });
+    
+    // 取消全選按鈕事件
+    document.getElementById('deselect-all-modes-button').addEventListener('click', function() {
+        const checkboxes = document.querySelectorAll('.mode-checkbox');
+        checkboxes.forEach(cb => cb.checked = false);
+        showMessage('✅ 已取消全選', 'success');
+    });
+    
+    // 批次刪除按鈕事件
+    document.getElementById('delete-selected-modes-button').addEventListener('click', function() {
+        const selectedCheckboxes = document.querySelectorAll('.mode-checkbox:checked');
+        
+        if (selectedCheckboxes.length === 0) {
+            showMessage('⚠️ 請先選擇要刪除的模式', 'warning');
+            return;
+        }
+        
+        if (!confirm(`確定要刪除 ${selectedCheckboxes.length} 個已選模式嗎？`)) {
+            return;
+        }
+        
+        selectedCheckboxes.forEach(checkbox => {
+            const modeIndex = checkbox.dataset.modeIndex;
+            const block = document.querySelector(`.mode-block[data-mode-index="${modeIndex}"]`);
+            if (block) {
+                block.remove();
+            }
+        });
+        
+        // 重新編號
+        renumberModeBlocks();
+        
+        showMessage(`✅ 已刪除 ${selectedCheckboxes.length} 個模式`, 'success');
+    });
     
     // 新增模式按鈕事件
     document.getElementById('add-mode-button').addEventListener('click', function() {
@@ -1763,18 +1838,19 @@
             const numberSpan = block.querySelector('span.text-2xl');
             if (numberSpan) numberSpan.textContent = `${newIndex}.`;
             
+            // 更新 checkbox
+            const checkbox = block.querySelector('.mode-checkbox');
+            if (checkbox) {
+                checkbox.dataset.modeIndex = newIndex;
+                checkbox.checked = false; // 重置選中狀態
+            }
+            
             // 更新 ID
             const codeTextarea = block.querySelector(`#mode-code-${oldIndex}`);
             const nameInput = block.querySelector(`#mode-name-${oldIndex}`);
             
             if (codeTextarea) codeTextarea.id = `mode-code-${newIndex}`;
             if (nameInput) nameInput.id = `mode-name-${newIndex}`;
-            
-            // 更新刪除按鈕
-            const deleteBtn = block.querySelector('button[onclick*="removeModeBlock"]');
-            if (deleteBtn) {
-                deleteBtn.setAttribute('onclick', `removeModeBlock(${newIndex})`);
-            }
         });
         
         modeCounter = blocks.length;
