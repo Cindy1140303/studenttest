@@ -1825,7 +1825,10 @@
         const container = document.getElementById('modes-container');
         const newBlock = createModeBlock(modeCounter);
         
-        // 按照編號順序插入到正確位置
+        // 取得操作按鈕區元素（按鈕區永遠在最後）
+        const buttonArea = container.querySelector('.mt-8.space-y-4');
+        
+        // 按照編號順序插入到正確位置（但要在按鈕區之前）
         const allBlocks = container.querySelectorAll('.mode-block');
         let inserted = false;
         
@@ -1837,9 +1840,9 @@
             }
         });
         
-        // 如果沒有插入（新區塊編號最大），則添加到最後
+        // 如果沒有插入（新區塊編號最大），則插入到按鈕區之前
         if (!inserted) {
-            container.appendChild(newBlock);
+            container.insertBefore(newBlock, buttonArea);
         }
         
         // 重新初始化圖示
