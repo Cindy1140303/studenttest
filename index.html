@@ -741,9 +741,9 @@
             answerHint: '填入 auto (系統自動驗證配對正確性)'
         },
         '拖拉方塊': {
-            optionsPlaceholder: '方塊1內容|目標位置1\n方塊2內容|目標位置2',
-            optionsHint: '拖拉方塊: 每行一組，用「|」分隔方塊內容和目標位置',
-            answerHint: '填入 auto (系統自動驗證)'
+            optionsPlaceholder: 'def factorial(n):\n    if n < 0: return None\n    result = 1\n    for i in range(1, n + 1):\n        result *= i\n    return result',
+            optionsHint: '拖拉方塊: 每行一個程式碼片段，按正確順序填寫(學生答題時會被打亂)',
+            answerHint: '填入 auto (系統會檢查程式碼順序是否正確)'
         }
     };
 
@@ -761,7 +761,7 @@
             formatHint.textContent = format.optionsHint;
             answerHelp.textContent = format.answerHint;
             
-            // 為連連看和拖拉方塊自動填入 auto
+            // 為連連看、拖拉方塊自動填入 auto
             if (selectedType === '連連看' || selectedType === '拖拉方塊') {
                 answerField.value = 'auto';
             } else {
@@ -788,7 +788,7 @@
             formatHint.textContent = format.optionsHint;
             answerHelp.textContent = format.answerHint;
             
-            // 為連連看和拖拉方塊自動填入 auto
+            // 為連連看、拖拉方塊自動填入 auto
             if (selectedType === '連連看' || selectedType === '拖拉方塊') {
                 if (!answerField.value || answerField.value === '') {
                     answerField.value = 'auto';
@@ -1044,9 +1044,30 @@
                                 <div class="text-gray-700">${formatOptions(q.options, q.type)}</div>
                             </div>
                         ` : ''}
-                        <div class="flex items-center text-sm">
-                            <span class="text-gray-500 mr-2">正確答案：</span>
-                            <span class="bg-green-100 text-green-800 px-3 py-1 rounded font-semibold">${q.answer || '未設定'}</span>
+                        <div class="flex items-center justify-between text-sm">
+                            <div class="flex items-center">
+                                <span class="text-gray-500 mr-2">正確答案：</span>
+                                <span class="bg-green-100 text-green-800 px-3 py-1 rounded font-semibold">${q.answer || '未設定'}</span>
+                            </div>
+                            <div class="flex items-center space-x-2">
+                                ${q.type === '拖拉方塊' ? `
+                                    <button onclick="copyQuestionLink('${q._id}')" 
+                                       class="inline-flex items-center px-3 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition font-semibold shadow-md text-sm">
+                                        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
+                                        </svg>
+                                        複製連結
+                                    </button>
+                                    <a href="code-drag-game.html?id=${q._id}" target="_blank" 
+                                       class="inline-flex items-center px-4 py-2 bg-amber-500 text-white rounded-lg hover:bg-amber-600 transition font-semibold shadow-md">
+                                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"></path>
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                        </svg>
+                                        開始答題
+                                    </a>
+                                ` : ''}
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -1092,6 +1113,31 @@
                 `;
             }
             
+            // 拖拉方塊格式: 每行一個程式碼區塊
+            if (questionType === '拖拉方塊') {
+                const codeLines = options.split('\n').filter(line => line.trim());
+                return `
+                    <div class="bg-gray-50 p-4 rounded-lg border border-gray-300">
+                        <div class="text-xs font-semibold text-gray-600 mb-3">程式碼區塊 (正確順序)</div>
+                        ${codeLines.map((line, index) => {
+                            return `
+                                <div class="flex items-start mb-2">
+                                    <div class="bg-blue-100 text-blue-800 font-bold px-2 py-1 rounded text-sm mr-2 flex-shrink-0">
+                                        ${index + 1}
+                                    </div>
+                                    <div class="bg-white px-3 py-2 rounded border border-gray-300 font-mono text-sm flex-grow">
+                                        ${line.trim()}
+                                    </div>
+                                </div>
+                            `;
+                        }).join('')}
+                    </div>
+                    <div class="mt-2 text-xs text-gray-500 italic">
+                        💡 學生答題時順序會被打亂，需要正確排列
+                    </div>
+                `;
+            }
+            
             // 拖拉方塊格式
             if (questionType === '拖拉方塊' && options.includes('|')) {
                 const items = options.split('\n').filter(line => line.trim());
@@ -1130,6 +1176,43 @@
         
         // 如果是物件或陣列
         return JSON.stringify(options);
+    }
+
+    // 複製題目連結到剪貼簿
+    function copyQuestionLink(questionId) {
+        const link = `${window.location.origin}/code-drag-game.html?id=${questionId}`;
+        
+        // 使用現代剪貼簿 API
+        if (navigator.clipboard && window.isSecureContext) {
+            navigator.clipboard.writeText(link).then(() => {
+                showMessage('✅ 連結已複製到剪貼簿！可以分享給學生了', 'success');
+            }).catch(() => {
+                fallbackCopyTextToClipboard(link);
+            });
+        } else {
+            fallbackCopyTextToClipboard(link);
+        }
+    }
+
+    // 備用複製方法（支援舊版瀏覽器）
+    function fallbackCopyTextToClipboard(text) {
+        const textArea = document.createElement('textarea');
+        textArea.value = text;
+        textArea.style.position = 'fixed';
+        textArea.style.left = '-999999px';
+        document.body.appendChild(textArea);
+        textArea.focus();
+        textArea.select();
+        
+        try {
+            document.execCommand('copy');
+            showMessage('✅ 連結已複製到剪貼簿！可以分享給學生了', 'success');
+        } catch (err) {
+            showMessage('❌ 複製失敗，請手動複製連結', 'error');
+            console.error('複製失敗:', err);
+        }
+        
+        document.body.removeChild(textArea);
     }
 
     // ========== 模式管理功能 ==========

@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>程式碼拖曳挑戰</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', 'Noto Sans TC', sans-serif;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            background-color: #fcf8f5;
+        }
+        .code-block {
+            padding: 0.75rem 1.25rem;
+            background-color: #f0f9ff;
+            border: 2px solid #a5f3fc;
+            border-radius: 0.5rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            cursor: grab;
+            transition: all 0.2s;
+            font-family: 'Courier New', monospace;
+            white-space: pre;
+        }
+        .code-block:hover {
+            background-color: #e0f2fe;
+            box-shadow: 0 6px 10px rgba(0, 0, 0, 0.15);
+        }
+        .code-block:active {
+            cursor: grabbing;
+        }
+        .drop-slot {
+            min-height: 3.5rem;
+            border: 2px dashed #9ca3af;
+            background-color: #f9fafb;
+            padding: 0.5rem;
+            border-radius: 0.5rem;
+            transition: all 0.2s;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+        }
+        .drop-slot.drag-over {
+            border-color: #f59e0b;
+            background-color: #fffbeb;
+            box-shadow: 0 0 10px rgba(245, 158, 11, 0.5);
+        }
+        .slot-content {
+            background-color: #ffffff;
+            border: 1px solid #d1d5db;
+            padding: 0.5rem 1rem;
+            border-radius: 0.375rem;
+            font-family: 'Courier New', monospace;
+            white-space: pre;
+            flex-grow: 1;
+        }
+    </style>
+</head>
+<body>
+    <div class="flex-grow max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-10">
+        <h1 class="text-4xl sm:text-5xl font-extrabold text-center text-amber-900 mb-8 tracking-wider">
+            程式碼拖曳挑戰
+        </h1>
+
+        <div class="text-center mb-10">
+            <div id="topic-context" class="w-full max-w-2xl mx-auto p-4 bg-white border border-amber-300 rounded-xl shadow-md text-amber-700 font-medium">
+                載入中...
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
+            <div class="lg:col-span-1 space-y-4">
+                <h2 class="text-xl font-bold text-amber-800 mb-4">可選程式碼片段</h2>
+                <div id="code-options" class="space-y-3">
+                </div>
+            </div>
+
+            <div class="lg:col-span-2">
+                <div class="w-full min-h-[400px] p-6 sm:p-8 bg-white border border-amber-300 rounded-xl shadow-2xl">
+                    <h2 class="text-2xl font-bold text-amber-800 mb-4 border-b pb-2 border-amber-100">
+                        程式碼組裝區 (拖曳目標)
+                    </h2>
+                    <div id="code-target" class="space-y-2 p-2 bg-gray-50 rounded-lg">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="flex justify-center space-x-6 mt-12">
+            <button onclick="checkAnswer()" class="transition duration-300 transform active:scale-95 px-8 py-3 bg-green-500 text-white font-bold rounded-full shadow-lg hover:bg-green-600 hover:shadow-green-300/50">
+                檢查答案
+            </button>
+            <button onclick="resetChallenge()" class="transition duration-300 transform active:scale-95 px-8 py-3 bg-rose-400 text-white font-bold rounded-full shadow-lg hover:bg-rose-500 hover:shadow-rose-300/50">
+                重設挑戰
+            </button>
+            <button onclick="backToList()" class="transition duration-300 transform active:scale-95 px-8 py-3 bg-gray-500 text-white font-bold rounded-full shadow-lg hover:bg-gray-600">
+                返回題目列表
+            </button>
+        </div>
+
+        <div id="result-modal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden items-center justify-center z-50">
+            <div class="bg-white p-8 rounded-xl shadow-2xl max-w-md w-full text-center">
+                <h3 id="modal-title" class="text-2xl font-bold mb-4"></h3>
+                <p id="modal-message" class="text-gray-700 mb-6"></p>
+                <button onclick="closeModal()" class="px-6 py-2 bg-amber-500 text-white rounded-lg hover:bg-amber-600 transition">繼續</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE_URL = 'https://studenttest.vercel.app/api';
+        let currentQuestion = null;
+        let currentSlots = {};
+
+        // 從 URL 參數或 API 載入題目
+        async function loadQuestion() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const questionId = urlParams.get('id');
+
+            if (questionId) {
+                try {
+                    const response = await fetch(`${API_BASE_URL}/questions/${questionId}`);
+                    const result = await response.json();
+                    if (result.success) {
+                        currentQuestion = result.data;
+                        parseAndDisplayQuestion();
+                    } else {
+                        showError('無法載入題目');
+                    }
+                } catch (error) {
+                    showError('載入題目失敗: ' + error.message);
+                }
+            } else {
+                showError('未指定題目 ID');
+            }
+        }
+
+        // 解析題目並顯示
+        function parseAndDisplayQuestion() {
+            if (!currentQuestion) return;
+
+            // 顯示題目內容
+            document.getElementById('topic-context').textContent = currentQuestion.content || '請依照邏輯順序，將左側的程式碼片段拖曳到右側的框框中。';
+
+            // 解析選項為程式碼區塊
+            const codeLines = currentQuestion.options.split('\n').filter(line => line.trim());
+            currentQuestion.correctBlocks = codeLines.map((line, index) => ({
+                id: 100 + index,
+                text: line,
+                order: index
+            }));
+
+            resetChallenge();
+        }
+
+        // 隨機排序
+        function shuffleArray(array) {
+            const newArray = [...array];
+            for (let i = newArray.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
+            }
+            return newArray;
+        }
+
+        // 拖曳事件處理
+        function dragStart(event) {
+            event.dataTransfer.setData("text/plain", event.target.dataset.blockId);
+            event.dataTransfer.setData("fromSlotId", event.target.parentElement.dataset.slotId || '');
+            event.target.classList.add('opacity-50');
+        }
+
+        function dragEnd(event) {
+            event.target.classList.remove('opacity-50');
+        }
+
+        function dragEnter(event) {
+            if (event.target.classList.contains('drop-slot') && !event.target.querySelector('.code-block')) {
+                event.target.classList.add('drag-over');
+            }
+            event.preventDefault();
+        }
+
+        function dragOver(event) {
+            event.preventDefault();
+        }
+
+        function dragLeave(event) {
+            if (event.target.classList.contains('drop-slot')) {
+                event.target.classList.remove('drag-over');
+            }
+        }
+
+        function drop(event) {
+            event.preventDefault();
+            const targetSlot = event.target.closest('.drop-slot');
+
+            if (targetSlot && !targetSlot.querySelector('.code-block')) {
+                const blockId = parseInt(event.dataTransfer.getData("text/plain"));
+                const fromSlotId = event.dataTransfer.getData("fromSlotId");
+                const targetSlotId = parseInt(targetSlot.dataset.slotId);
+
+                targetSlot.classList.remove('drag-over');
+                const draggedElement = document.getElementById(`block-${blockId}`);
+
+                if (draggedElement) {
+                    currentSlots[targetSlotId] = blockId;
+                    targetSlot.innerHTML = '';
+                    targetSlot.appendChild(draggedElement);
+                    draggedElement.classList.add('slot-content');
+
+                    if (fromSlotId) {
+                        const originalSlotId = parseInt(fromSlotId);
+                        const originalSlot = document.querySelector(`.drop-slot[data-slot-id="${originalSlotId}"]`);
+                        if (originalSlot) {
+                            originalSlot.innerHTML = '';
+                            delete currentSlots[originalSlotId];
+                        }
+                    }
+                }
+            } else if (targetSlot) {
+                targetSlot.classList.remove('drag-over');
+            }
+        }
+
+        // 渲染選項
+        function renderOptions() {
+            const container = document.getElementById('code-options');
+            container.innerHTML = '';
+
+            if (!currentQuestion || !currentQuestion.correctBlocks) return;
+
+            const shuffledBlocks = shuffleArray([...currentQuestion.correctBlocks]);
+
+            shuffledBlocks.forEach(block => {
+                if (Object.values(currentSlots).includes(block.id)) return;
+
+                const blockElement = document.createElement('div');
+                blockElement.id = `block-${block.id}`;
+                blockElement.dataset.blockId = block.id;
+                blockElement.textContent = block.text;
+                blockElement.className = 'code-block';
+
+                blockElement.setAttribute('draggable', 'true');
+                blockElement.addEventListener('dragstart', dragStart);
+                blockElement.addEventListener('dragend', dragEnd);
+
+                container.appendChild(blockElement);
+            });
+        }
+
+        // 渲染槽位
+        function renderSlots() {
+            const container = document.getElementById('code-target');
+            container.innerHTML = '';
+            currentSlots = {};
+
+            if (!currentQuestion || !currentQuestion.correctBlocks) return;
+
+            currentQuestion.correctBlocks.forEach((block, index) => {
+                const slotElement = document.createElement('div');
+                slotElement.className = 'drop-slot';
+                slotElement.dataset.slotId = index;
+                slotElement.textContent = `${index + 1}. (將程式碼拖曳至此)`;
+
+                slotElement.addEventListener('dragenter', dragEnter);
+                slotElement.addEventListener('dragover', dragOver);
+                slotElement.addEventListener('dragleave', dragLeave);
+                slotElement.addEventListener('drop', drop);
+
+                container.appendChild(slotElement);
+            });
+        }
+
+        // 檢查答案
+        function checkAnswer() {
+            if (!currentQuestion) return;
+
+            const slots = document.getElementById('code-target').querySelectorAll('.drop-slot');
+            let isCorrect = true;
+            let correctCount = 0;
+            const feedbackMessages = [];
+            const correctOrderMap = currentQuestion.correctBlocks.reduce((map, block) => {
+                map[block.order] = block.id;
+                return map;
+            }, {});
+
+            slots.forEach(slot => {
+                const slotId = parseInt(slot.dataset.slotId);
+                const blockElement = slot.querySelector('.code-block');
+
+                if (!blockElement) {
+                    isCorrect = false;
+                    feedbackMessages.push(`第 ${slotId + 1} 行遺漏了程式碼。`);
+                    return;
+                }
+
+                const blockId = parseInt(blockElement.dataset.blockId);
+                const expectedBlockId = correctOrderMap[slotId];
+
+                if (blockId === expectedBlockId) {
+                    correctCount++;
+                } else {
+                    isCorrect = false;
+                    feedbackMessages.push(`第 ${slotId + 1} 行放置錯誤。`);
+                }
+            });
+
+            const modalTitle = document.getElementById('modal-title');
+            const modalMessage = document.getElementById('modal-message');
+
+            if (isCorrect) {
+                modalTitle.textContent = "恭喜您！✅ 答案正確！";
+                modalTitle.classList.remove('text-red-600');
+                modalTitle.classList.add('text-green-600');
+                modalMessage.innerHTML = `您已成功組裝程式碼。`;
+            } else {
+                modalTitle.textContent = "抱歉，答案錯誤 ❌";
+                modalTitle.classList.remove('text-green-600');
+                modalTitle.classList.add('text-red-600');
+
+                let messageHtml = `<p class="mb-3">您有 ${correctCount} / ${currentQuestion.correctBlocks.length} 行程式碼正確。</p>`;
+                if (feedbackMessages.length > 0) {
+                    messageHtml += `<p class="font-bold">錯誤提示：</p><ul class="list-disc list-inside text-left mx-auto max-w-xs mt-2">${feedbackMessages.map(msg => `<li>${msg}</li>`).join('')}</ul>`;
+                }
+                modalMessage.innerHTML = messageHtml;
+            }
+
+            document.getElementById('result-modal').classList.remove('hidden');
+            document.getElementById('result-modal').classList.add('flex');
+        }
+
+        function resetChallenge() {
+            renderSlots();
+            renderOptions();
+        }
+
+        function closeModal() {
+            document.getElementById('result-modal').classList.remove('flex');
+            document.getElementById('result-modal').classList.add('hidden');
+        }
+
+        function backToList() {
+            window.location.href = 'index.html';
+        }
+
+        function showError(message) {
+            document.getElementById('topic-context').textContent = '錯誤: ' + message;
+        }
+
+        // 初始化
+        window.onload = loadQuestion;
+    </script>
+</body>
+</html>

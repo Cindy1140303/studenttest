@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>程式碼拖曳挑戰 - 學習介面</title>
+    <!-- 載入 Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* 使用 Inter 字體並確保中文字體顯示正常 */
+        body {
+            font-family: 'Inter', 'Noto Sans TC', sans-serif;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            background-color: #fcf8f5; /* 柔和的米白色背景 */
+            position: relative;
+        }
+        /* 模擬圖中柔和的背景邊框 */
+        .page-container::before,
+        .page-container::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            width: 15%;
+            height: 100%;
+            background: linear-gradient(180deg, rgba(255, 230, 210, 0.5) 0%, rgba(255, 255, 255, 0) 100%);
+            pointer-events: none;
+            z-index: 0;
+        }
+        .page-container::before {
+            left: 0;
+            transform: skewY(-5deg);
+            transform-origin: top left;
+        }
+        .page-container::after {
+            right: 0;
+            transform: skewY(5deg);
+            transform-origin: top right;
+        }
+        /* 拖曳代碼塊的樣式 */
+        .code-block {
+            padding: 0.75rem 1.25rem;
+            background-color: #f0f9ff; /* 淺藍色背景 */
+            border: 2px solid #a5f3fc; /* 淺青色邊框 */
+            border-radius: 0.5rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            cursor: grab;
+            transition: all 0.2s;
+            font-family: monospace;
+            white-space: pre; /* 保留程式碼的空格 */
+        }
+        .code-block:hover {
+            background-color: #e0f2fe;
+            box-shadow: 0 6px 10px rgba(0, 0, 0, 0.15);
+        }
+        .code-block:active {
+            cursor: grabbing;
+        }
+        /* 拖曳目標槽位的樣式 */
+        .drop-slot {
+            min-height: 3.5rem; /* 確保槽位足夠大 */
+            border: 2px dashed #9ca3af;
+            background-color: #f9fafb;
+            padding: 0.5rem;
+            border-radius: 0.5rem;
+            transition: all 0.2s;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+        }
+        .drop-slot.drag-over {
+            border-color: #f59e0b; /* 拖曳時高亮邊框 */
+            background-color: #fffbeb;
+            box-shadow: 0 0 10px rgba(245, 158, 11, 0.5);
+        }
+        /* 拖曳目標中程式碼行的樣式 */
+        .slot-content {
+            background-color: #ffffff;
+            border: 1px solid #d1d5db;
+            padding: 0.5rem 1rem;
+            border-radius: 0.375rem;
+            font-family: monospace;
+            white-space: pre;
+            flex-grow: 1;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 主要容器 -->
+    <div class="page-container flex-grow max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-10 relative z-10">
+
+        <!-- 標題 -->
+        <h1 class="text-4xl sm:text-5xl font-extrabold text-center text-amber-900 mb-8 tracking-wider">
+            程式碼拖曳挑戰
+        </h1>
+
+        <!-- 外部題目/情境描述 -->
+        <div class="text-center mb-10">
+            <div id="topic-context" class="w-full max-w-2xl mx-auto p-4 bg-white border border-amber-300 rounded-xl shadow-md text-amber-700 font-medium">
+                請依照邏輯順序，將左側的程式碼片段拖曳到右側的框框中，完成計算數字階乘的 Python 函式。
+            </div>
+        </div>
+
+        <!-- 主內容區塊：左右佈局 -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
+            
+            <!-- 左側：可拖曳的程式碼選項 -->
+            <div class="lg:col-span-1 space-y-4">
+                <h2 class="text-xl font-bold text-amber-800 mb-4">可選程式碼片段</h2>
+                <div id="code-options" class="space-y-3">
+                    <!-- 程式碼選項將由 JavaScript 填充並隨機排序 -->
+                </div>
+            </div>
+
+            <!-- 右側：程式碼組裝目標區塊 -->
+            <div class="lg:col-span-2">
+                <div class="w-full min-h-[400px] p-6 sm:p-8 bg-white border border-amber-300 rounded-xl shadow-2xl">
+                    <h2 class="text-2xl font-bold text-amber-800 mb-4 border-b pb-2 border-amber-100">
+                        Python 函式區塊 (拖曳目標)
+                    </h2>
+                    <div id="code-target" class="space-y-2 p-2 bg-gray-50 rounded-lg">
+                        <!-- 拖曳槽位將由 JavaScript 填充 -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 底部按鈕區塊 -->
+        <div class="flex justify-center space-x-6 mt-12">
+            
+            <!-- 檢查答案按鈕 -->
+            <button onclick="checkAnswer()" class="transition duration-300 transform active:scale-95 px-8 py-3 bg-green-500 text-white font-bold rounded-full shadow-lg hover:bg-green-600 hover:shadow-green-300/50">
+                檢查答案
+            </button>
+            
+            <!-- 重設按鈕 -->
+            <button onclick="resetChallenge()" class="transition duration-300 transform active:scale-95 px-8 py-3 bg-rose-400 text-white font-bold rounded-full shadow-lg hover:bg-rose-500 hover:shadow-rose-300/50">
+                重設挑戰
+            </button>
+        </div>
+
+        <!-- 模擬結果顯示 Modal -->
+        <div id="result-modal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden items-center justify-center z-50">
+            <div class="bg-white p-8 rounded-xl shadow-2xl max-w-md w-full text-center">
+                <h3 id="modal-title" class="text-2xl font-bold mb-4"></h3>
+                <p id="modal-message" class="text-gray-700 mb-6"></p>
+                <button onclick="closeModal()" class="px-6 py-2 bg-amber-500 text-white rounded-lg hover:bg-amber-600 transition">繼續</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript 邏輯：處理拖曳、渲染和驗證 -->
+    <script>
+        // --- 模擬題目數據 ---
+        const mockCodeChallenge = {
+            title: "實作階乘函式 (Factorial Function)",
+            prompt: "請依照邏輯順序，將左側的程式碼片段拖曳到右側的框框中，完成計算數字階乘的 Python 函式。",
+            // 正確的程式碼塊（將被隨機排序）
+            correctBlocks: [ 
+                { id: 101, text: "def factorial(n):", order: 0 },
+                { id: 102, text: "    if n < 0: return None", order: 1 }, // 新增基礎檢查
+                { id: 103, text: "    result = 1", order: 2 },
+                { id: 104, text: "    for i in range(1, n + 1):", order: 3 },
+                { id: 105, text: "        result *= i", order: 4 },
+                { id: 106, text: "    return result", order: 5 },
+            ]
+        };
+
+        // --- 狀態管理 ---
+        let currentSlots = {}; // 儲存每個 slotId: blockId 的映射
+
+        // --- 輔助函數：隨機排序 ---
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+
+        // --- DND 事件處理 ---
+
+        // 拖曳開始
+        function dragStart(event) {
+            event.dataTransfer.setData("text/plain", event.target.dataset.blockId);
+            // 記錄被拖曳方塊原本所在的 slotId (如果有的話)
+            event.dataTransfer.setData("fromSlotId", event.target.parentElement.dataset.slotId || '');
+            event.target.classList.add('opacity-50');
+        }
+
+        // 拖曳結束
+        function dragEnd(event) {
+            event.target.classList.remove('opacity-50');
+        }
+
+        // 拖曳進入目標區域
+        function dragEnter(event) {
+            if (event.target.classList.contains('drop-slot') && !event.target.querySelector('.code-block')) {
+                event.target.classList.add('drag-over');
+            }
+            event.preventDefault(); // 允許放置
+        }
+
+        // 拖曳停留在目標區域
+        function dragOver(event) {
+            event.preventDefault(); // 允許放置
+        }
+
+        // 拖曳離開目標區域
+        function dragLeave(event) {
+            if (event.target.classList.contains('drop-slot')) {
+                event.target.classList.remove('drag-over');
+            }
+        }
+
+        // 放置
+        function drop(event) {
+            event.preventDefault();
+            const targetSlot = event.target.closest('.drop-slot');
+
+            if (targetSlot && !targetSlot.querySelector('.code-block')) {
+                // 1. 從 dataTransfer 取得拖曳的 blockId 和來源 slotId
+                const blockId = parseInt(event.dataTransfer.getData("text/plain"));
+                const fromSlotId = event.dataTransfer.getData("fromSlotId");
+                const targetSlotId = parseInt(targetSlot.dataset.slotId);
+
+                // 2. 移除目標槽位的拖曳高亮
+                targetSlot.classList.remove('drag-over');
+                
+                // 3. 取得要移動的 code block 元素
+                const draggedElement = document.getElementById(`block-${blockId}`);
+
+                if (draggedElement) {
+                    // 4. 更新狀態：將 blockId 放到新的 slotId
+                    currentSlots[targetSlotId] = blockId;
+
+                    // 5. 將元素移動到目標槽位
+                    targetSlot.innerHTML = '';
+                    targetSlot.appendChild(draggedElement);
+                    draggedElement.classList.add('slot-content'); // 增加目標區域的樣式
+
+                    // 6. 如果 block 之前在某個槽位，清空那個槽位
+                    if (fromSlotId) {
+                        const originalSlotId = parseInt(fromSlotId);
+                        const originalSlot = document.querySelector(`.drop-slot[data-slot-id="${originalSlotId}"]`);
+                        if (originalSlot) {
+                            originalSlot.innerHTML = '';
+                            delete currentSlots[originalSlotId];
+                        }
+                    } else {
+                        // 7. 如果 block 是從左側選項區拖過來的，則從左側清空
+                        const parent = draggedElement.parentElement;
+                        if (parent && parent.id === 'code-options') {
+                             draggedElement.remove();
+                        }
+                    }
+                }
+            } else if (targetSlot) {
+                // 如果目標槽位已經有內容，不執行放置，只移除高亮
+                targetSlot.classList.remove('drag-over');
+            }
+        }
+        
+        // --- 渲染函數 ---
+
+        // 渲染左側可拖曳選項
+        function renderOptions() {
+            const container = document.getElementById('code-options');
+            container.innerHTML = '';
+            
+            // 隨機排序 blocks 確保每次挑戰順序不同
+            const shuffledBlocks = shuffleArray([...mockCodeChallenge.correctBlocks]);
+
+            shuffledBlocks.forEach(block => {
+                // 檢查該 block 是否已被使用 (如果在 currentSlots 中則不渲染)
+                if (Object.values(currentSlots).includes(block.id)) return;
+
+                const blockElement = document.createElement('div');
+                blockElement.id = `block-${block.id}`;
+                blockElement.dataset.blockId = block.id;
+                blockElement.textContent = block.text;
+                blockElement.className = 'code-block';
+                
+                // 設置拖曳屬性
+                blockElement.setAttribute('draggable', 'true');
+                blockElement.addEventListener('dragstart', dragStart);
+                blockElement.addEventListener('dragend', dragEnd);
+
+                container.appendChild(blockElement);
+            });
+        }
+
+        // 渲染右側拖曳目標槽位
+        function renderSlots() {
+            const container = document.getElementById('code-target');
+            container.innerHTML = '';
+            currentSlots = {}; // 重設狀態
+
+            mockCodeChallenge.correctBlocks.forEach((block, index) => {
+                const slotElement = document.createElement('div');
+                slotElement.className = 'drop-slot';
+                slotElement.dataset.slotId = index;
+                slotElement.textContent = `${index + 1}. (將程式碼拖曳至此)`; 
+                
+                // 設置 DND 監聽器
+                slotElement.addEventListener('dragenter', dragEnter);
+                slotElement.addEventListener('dragover', dragOver);
+                slotElement.addEventListener('dragleave', dragLeave);
+                slotElement.addEventListener('drop', drop);
+
+                container.appendChild(slotElement);
+            });
+        }
+
+        // --- 邏輯驗證 ---
+        function checkAnswer() {
+            const slots = document.getElementById('code-target').querySelectorAll('.drop-slot');
+            let isCorrect = true;
+            let correctCount = 0;
+            const feedbackMessages = [];
+            const correctOrderMap = mockCodeChallenge.correctBlocks.reduce((map, block) => {
+                map[block.order] = block.id;
+                return map;
+            }, {});
+
+            slots.forEach(slot => {
+                const slotId = parseInt(slot.dataset.slotId);
+                const blockElement = slot.querySelector('.code-block');
+                
+                if (!blockElement) {
+                    isCorrect = false;
+                    feedbackMessages.push(`第 ${slotId + 1} 行遺漏了程式碼。`);
+                    return;
+                }
+
+                const blockId = parseInt(blockElement.dataset.blockId);
+                const expectedBlockId = correctOrderMap[slotId];
+                
+                if (blockId === expectedBlockId) {
+                    correctCount++;
+                } else {
+                    isCorrect = false;
+                    const incorrectText = blockElement.textContent.trim();
+                    feedbackMessages.push(`第 ${slotId + 1} 行放置錯誤。`);
+                }
+            });
+
+            // 顯示結果
+            const modalTitle = document.getElementById('modal-title');
+            const modalMessage = document.getElementById('modal-message');
+
+            if (isCorrect) {
+                modalTitle.textContent = "恭喜您！✅ 答案正確！";
+                modalTitle.classList.remove('text-red-600');
+                modalTitle.classList.add('text-green-600');
+                modalMessage.innerHTML = `您已成功組裝 Python 階乘函式。`;
+            } else {
+                modalTitle.textContent = "抱歉，答案錯誤 ❌";
+                modalTitle.classList.remove('text-green-600');
+                modalTitle.classList.add('text-red-600');
+                
+                let messageHtml = `<p class="mb-3">您有 ${correctCount} / ${mockCodeChallenge.correctBlocks.length} 行程式碼正確。</p>`;
+                if (feedbackMessages.length > 0) {
+                     messageHtml += `<p class="font-bold">錯誤提示：</p><ul class="list-disc list-inside text-left mx-auto max-w-xs mt-2">${feedbackMessages.map(msg => `<li>${msg}</li>`).join('')}</ul>`;
+                }
+                modalMessage.innerHTML = messageHtml;
+            }
+
+            document.getElementById('result-modal').classList.remove('hidden');
+            document.getElementById('result-modal').classList.add('flex');
+        }
+
+        // --- 初始化與重設 ---
+
+        function resetChallenge() {
+            renderSlots();
+            renderOptions();
+        }
+
+        // 函式：關閉模態框
+        function closeModal() {
+            document.getElementById('result-modal').classList.remove('flex');
+            document.getElementById('result-modal').classList.add('hidden');
+        }
+        
+        // 初始化介面
+        window.onload = resetChallenge;
+    </script>
+</body>
+</html>
