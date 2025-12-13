@@ -236,10 +236,10 @@
             <div id="tab-mode" class="hidden">
                 <h3 class="text-xl font-semibold mb-8 text-gray-800 text-center">互動考題模式定義 (VUE Code)</h3>
 
-                <div class="space-y-12">
+                <div id="modes-container" class="space-y-12">
                     
                     <!-- Mode 1: 連連看 (Connect-the-Dots) -->
-                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start p-4 border border-gray-200 rounded-xl bg-gray-50">
+                    <div class="mode-block grid grid-cols-1 lg:grid-cols-2 gap-8 items-start p-4 border border-gray-200 rounded-xl bg-gray-50" data-mode-index="1">
                         <div class="flex items-start space-x-4">
                             <span class="text-2xl font-mono pt-1 text-gray-500 w-8 text-right">1.</span>
                             <div class="flex-grow">
@@ -254,7 +254,7 @@
                     </div>
 
                     <!-- Mode 2: 拖拉方塊 (Drag Blocks) -->
-                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start p-4 border border-gray-200 rounded-xl bg-gray-50">
+                    <div class="mode-block grid grid-cols-1 lg:grid-cols-2 gap-8 items-start p-4 border border-gray-200 rounded-xl bg-gray-50" data-mode-index="2">
                         <div class="flex items-start space-x-4">
                             <span class="text-2xl font-mono pt-1 text-gray-500 w-8 text-right">2.</span>
                             <div class="flex-grow">
@@ -269,7 +269,7 @@
                     </div>
                     
                     <!-- Mode 3: 單選題 (Single Choice) -->
-                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start p-4 border border-gray-200 rounded-xl bg-gray-50">
+                    <div class="mode-block grid grid-cols-1 lg:grid-cols-2 gap-8 items-start p-4 border border-gray-200 rounded-xl bg-gray-50" data-mode-index="3">
                         <div class="flex items-start space-x-4">
                             <span class="text-2xl font-mono pt-1 text-gray-500 w-8 text-right">3.</span>
                             <div class="flex-grow">
@@ -284,7 +284,7 @@
                     </div>
 
                     <!-- Mode 4: 多選題 (Multiple Choice) -->
-                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start p-4 border border-gray-200 rounded-xl bg-gray-50">
+                    <div class="mode-block grid grid-cols-1 lg:grid-cols-2 gap-8 items-start p-4 border border-gray-200 rounded-xl bg-gray-50" data-mode-index="4">
                         <div class="flex items-start space-x-4">
                             <span class="text-2xl font-mono pt-1 text-gray-500 w-8 text-right">4.</span>
                             <div class="flex-grow">
@@ -299,7 +299,7 @@
                     </div>
 
                     <!-- Mode 5: 是非題 (True/False) -->
-                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start p-4 border border-gray-200 rounded-xl bg-gray-50">
+                    <div class="mode-block grid grid-cols-1 lg:grid-cols-2 gap-8 items-start p-4 border border-gray-200 rounded-xl bg-gray-50" data-mode-index="5">
                         <div class="flex items-start space-x-4">
                             <span class="text-2xl font-mono pt-1 text-gray-500 w-8 text-right">5.</span>
                             <div class="flex-grow">
@@ -314,7 +314,7 @@
                     </div>
 
                     <!-- Mode 6: 填空題 (Fill in the Blank) -->
-                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start p-4 border border-gray-200 rounded-xl bg-gray-50">
+                    <div class="mode-block grid grid-cols-1 lg:grid-cols-2 gap-8 items-start p-4 border border-gray-200 rounded-xl bg-gray-50" data-mode-index="6">
                         <div class="flex items-start space-x-4">
                             <span class="text-2xl font-mono pt-1 text-gray-500 w-8 text-right">6.</span>
                             <div class="flex-grow">
@@ -328,8 +328,12 @@
                         </div>
                     </div>
 
-                    <!-- 儲存按鈕 -->
-                    <div class="flex justify-center mt-8">
+                    <!-- 新增和儲存按鈕 -->
+                    <div class="flex justify-center gap-4 mt-8">
+                        <button id="add-mode-button" class="action-button bg-gradient-to-r from-green-400 to-teal-500 hover:from-green-500 hover:to-teal-600 text-white px-8 py-4 text-lg">
+                            <i data-lucide="plus-circle" class="inline w-5 h-5 mr-2"></i>
+                            新增模式
+                        </button>
                         <button id="save-modes-button" class="action-button bg-gradient-to-r from-orange-400 to-pink-500 hover:from-orange-500 hover:to-pink-600 text-white px-12 py-4 text-lg">
                             <i data-lucide="save" class="inline w-5 h-5 mr-2"></i>
                             儲存所有模式
@@ -1689,6 +1693,93 @@
 
     // ========== 模式管理功能 ==========
     
+    let modeCounter = 6; // 已有 6 個預設模式
+    
+    // 創建新的模式區塊
+    function createModeBlock(index, name = '', code = '') {
+        const modeBlock = document.createElement('div');
+        modeBlock.className = 'mode-block grid grid-cols-1 lg:grid-cols-2 gap-8 items-start p-4 border border-gray-200 rounded-xl bg-gray-50 relative';
+        modeBlock.dataset.modeIndex = index;
+        
+        modeBlock.innerHTML = `
+            <div class="flex items-start space-x-4">
+                <span class="text-2xl font-mono pt-1 text-gray-500 w-8 text-right">${index}.</span>
+                <div class="flex-grow">
+                    <label class="text-sm font-medium text-gray-600 mb-2 block">HTML/JS/CSS code(VUE)</label>
+                    <textarea id="mode-code-${index}" class="input-style w-full h-40 focus:outline-none focus:ring-2 focus:ring-orange-500 p-3 text-sm font-mono resize-none" placeholder="在此輸入 VUE 單檔案組件代碼...">${code}</textarea>
+                </div>
+            </div>
+            <div>
+                <label class="text-sm font-medium text-gray-600 mb-2 block">對應模式名稱</label>
+                <input id="mode-name-${index}" type="text" value="${name}" class="input-style w-full text-lg font-bold text-center py-4 bg-yellow-200 border-yellow-500 text-gray-800 focus:outline-none focus:ring-2 focus:ring-orange-500" placeholder="請輸入模式名稱">
+                ${index > 6 ? `
+                    <button type="button" onclick="removeModeBlock(${index})" class="mt-3 w-full px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition text-sm">
+                        <i data-lucide="trash-2" class="inline w-4 h-4 mr-1"></i>
+                        刪除此模式
+                    </button>
+                ` : ''}
+            </div>
+        `;
+        
+        return modeBlock;
+    }
+    
+    // 新增模式按鈕事件
+    document.getElementById('add-mode-button').addEventListener('click', function() {
+        modeCounter++;
+        const container = document.getElementById('modes-container');
+        const newBlock = createModeBlock(modeCounter);
+        
+        // 插入到按鈕區之前
+        container.appendChild(newBlock);
+        
+        // 重新初始化圖示
+        lucide.createIcons();
+        
+        showMessage(`✅ 已新增第 ${modeCounter} 個模式區塊`, 'success');
+    });
+    
+    // 刪除模式區塊
+    window.removeModeBlock = function(index) {
+        const block = document.querySelector(`.mode-block[data-mode-index="${index}"]`);
+        if (block) {
+            block.remove();
+            showMessage(`✅ 已刪除模式區塊`, 'success');
+            // 重新編號
+            renumberModeBlocks();
+        }
+    };
+    
+    // 重新編號模式區塊
+    function renumberModeBlocks() {
+        const blocks = document.querySelectorAll('.mode-block');
+        blocks.forEach((block, index) => {
+            const newIndex = index + 1;
+            const oldIndex = block.dataset.modeIndex;
+            
+            block.dataset.modeIndex = newIndex;
+            
+            // 更新編號顯示
+            const numberSpan = block.querySelector('span.text-2xl');
+            if (numberSpan) numberSpan.textContent = `${newIndex}.`;
+            
+            // 更新 ID
+            const codeTextarea = block.querySelector(`#mode-code-${oldIndex}`);
+            const nameInput = block.querySelector(`#mode-name-${oldIndex}`);
+            
+            if (codeTextarea) codeTextarea.id = `mode-code-${newIndex}`;
+            if (nameInput) nameInput.id = `mode-name-${newIndex}`;
+            
+            // 更新刪除按鈕
+            const deleteBtn = block.querySelector('button[onclick*="removeModeBlock"]');
+            if (deleteBtn) {
+                deleteBtn.setAttribute('onclick', `removeModeBlock(${newIndex})`);
+            }
+        });
+        
+        modeCounter = blocks.length;
+    }
+    
     // 載入已儲存的模式資料
     async function loadModes() {
         try {
@@ -1719,10 +1810,12 @@
     document.getElementById('save-modes-button').addEventListener('click', async function() {
         const modes = [];
         
-        // 收集所有模式資料（支援 6 個模式）
-        for (let i = 1; i <= 6; i++) {
-            const nameInput = document.getElementById(`mode-name-${i}`);
-            const codeInput = document.getElementById(`mode-code-${i}`);
+        // 收集所有模式資料（動態數量）
+        const modeBlocks = document.querySelectorAll('.mode-block');
+        modeBlocks.forEach((block, index) => {
+            const modeNum = index + 1;
+            const nameInput = block.querySelector(`#mode-name-${modeNum}`);
+            const codeInput = block.querySelector(`#mode-code-${modeNum}`);
             
             if (nameInput) {
                 const name = nameInput.value.trim();
@@ -1733,11 +1826,11 @@
                         name: name,
                         code: code || '',
                         description: `${name}模式`,
-                        order: i
+                        order: modeNum
                     });
                 }
             }
-        }
+        });
         
         if (modes.length === 0) {
             showMessage('⚠️ 請至少填寫一個模式名稱');
