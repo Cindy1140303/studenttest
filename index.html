@@ -1962,18 +1962,29 @@
             }
         });
         
-        if (modes.length === 0) {
-            showMessage('⚠️ 請至少填寫一個模式名稱');
-            return;
-        }
-        
         try {
-            // 先刪除所有現有模式,再批次新增
+            // 先刪除所有現有模式（確保刪除完成）
+            console.log('🗑️ 正在刪除所有現有模式...');
             const deleteResponse = await fetch(`${API_BASE_URL}/modes`, {
                 method: 'DELETE'
             });
             
+            if (!deleteResponse.ok) {
+                throw new Error(`刪除失敗: HTTP ${deleteResponse.status}`);
+            }
+            
+            const deleteResult = await deleteResponse.json();
+            console.log('✅ 刪除完成:', deleteResult);
+            
+            // 如果沒有要儲存的模式，直接完成
+            if (modes.length === 0) {
+                showMessage('✅ 已清空所有模式');
+                loadAssignmentData();
+                return;
+            }
+            
             // 批次新增模式
+            console.log(`📝 正在新增 ${modes.length} 個模式...`);
             const savePromises = modes.map(mode => 
                 fetch(`${API_BASE_URL}/modes`, {
                     method: 'POST',
@@ -1991,6 +2002,7 @@
             
             if (successCount > 0) {
                 showMessage(`✅ 成功儲存 ${successCount} 個模式！`);
+                console.log('✅ 儲存完成');
                 // 重新載入考題分派的模式選單
                 loadAssignmentData();
             } else {
