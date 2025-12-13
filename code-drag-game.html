@@ -132,19 +132,31 @@
 
             if (questionId) {
                 try {
+                    console.log('正在載入題目 ID:', questionId);
+                    console.log('API URL:', `${API_BASE_URL}/questions/${questionId}`);
+                    
                     const response = await fetch(`${API_BASE_URL}/questions/${questionId}`);
+                    console.log('回應狀態:', response.status);
+                    
+                    if (!response.ok) {
+                        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                    }
+                    
                     const result = await response.json();
+                    console.log('API 回應:', result);
+                    
                     if (result.success) {
                         currentQuestion = result.data;
                         parseAndDisplayQuestion();
                     } else {
-                        showError('無法載入題目');
+                        showError(`無法載入題目: ${result.error || '未知錯誤'}`);
                     }
                 } catch (error) {
-                    showError('載入題目失敗: ' + error.message);
+                    console.error('載入題目錯誤:', error);
+                    showError(`載入題目失敗: ${error.message}<br><br>請確認：<br>1. 題目 ID 是否正確<br>2. 後端 API 是否正常運作<br>3. 網路連線是否正常`);
                 }
             } else {
-                showError('未指定題目 ID');
+                showError('未指定題目 ID<br><br>請從題目列表點擊「開始答題」按鈕進入');
             }
         }
 
@@ -391,11 +403,18 @@
         }
 
         function backToList() {
-            window.location.href = 'index.html';
+            const basePath = window.location.pathname.includes('/studenttest/') ? '/studenttest/' : '/';
+            window.location.href = `${basePath}index.html`;
         }
 
         function showError(message) {
-            document.getElementById('topic-context').textContent = '錯誤: ' + message;
+            const topicContext = document.getElementById('topic-context');
+            topicContext.innerHTML = `
+                <div class="text-red-600 font-bold text-lg mb-2">⚠️ 載入錯誤</div>
+                <div class="text-left text-sm">${message}</div>
+            `;
+            topicContext.classList.add('border-red-300', 'bg-red-50');
+            topicContext.classList.remove('border-amber-300');
         }
 
         // 初始化
