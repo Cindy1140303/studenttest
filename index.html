@@ -1862,26 +1862,31 @@
             const response = await fetch(`${API_BASE_URL}/modes`);
             const result = await response.json();
             
+            const container = document.getElementById('modes-container');
+            
             if (result.success && result.data.length > 0) {
-                // 清空現有的模式區塊（保留 HTML 中的前 6 個預設區塊）
-                const container = document.getElementById('modes-container');
+                // 先移除所有超過資料庫模式數量的區塊
+                const allBlocks = document.querySelectorAll('.mode-block');
+                allBlocks.forEach((block, index) => {
+                    if (index >= result.data.length) {
+                        block.remove();
+                    }
+                });
                 
-                // 只填充資料庫中有的模式
+                // 填充或創建資料庫中的模式
                 result.data.forEach((mode, index) => {
                     const modeNum = index + 1;
-                    
-                    // 檢查該位置的區塊是否存在
                     let existingBlock = document.querySelector(`.mode-block[data-mode-index="${modeNum}"]`);
                     
                     if (existingBlock) {
-                        // 如果區塊存在，只更新值
+                        // 更新現有區塊
                         const nameInput = existingBlock.querySelector(`#mode-name-${modeNum}`);
                         const codeInput = existingBlock.querySelector(`#mode-code-${modeNum}`);
                         
                         if (nameInput) nameInput.value = mode.name || '';
                         if (codeInput) codeInput.value = mode.code || '';
                     } else {
-                        // 如果區塊不存在（超過前 6 個），創建新區塊
+                        // 創建新區塊
                         const newBlock = createModeBlock(modeNum, mode.name || '', mode.code || '');
                         container.appendChild(newBlock);
                     }
@@ -1890,30 +1895,31 @@
                 // 更新計數器
                 modeCounter = result.data.length;
                 
-                // 清空未被使用的預設區塊（如果資料庫模式少於 6 個）
-                for (let i = result.data.length + 1; i <= 6; i++) {
-                    const unusedBlock = document.querySelector(`.mode-block[data-mode-index="${i}"]`);
-                    if (unusedBlock) {
-                        const nameInput = unusedBlock.querySelector(`#mode-name-${i}`);
-                        const codeInput = unusedBlock.querySelector(`#mode-code-${i}`);
-                        if (nameInput) nameInput.value = '';
-                        if (codeInput) codeInput.value = '';
-                    }
-                }
+                // 重新編號確保一致性
+                renumberModeBlocks();
                 
                 // 重新初始化圖示
                 lucide.createIcons();
                 
                 console.log(`✅ 已載入 ${result.data.length} 個模式資料`);
             } else {
-                // 如果沒有資料，清空所有輸入框
-                for (let i = 1; i <= 6; i++) {
-                    const nameInput = document.getElementById(`mode-name-${i}`);
-                    const codeInput = document.getElementById(`mode-code-${i}`);
-                    if (nameInput) nameInput.value = '';
-                    if (codeInput) codeInput.value = '';
-                }
-                console.log('⚠️ 資料庫中沒有模式資料');
+                // 沒有資料，移除所有超過前 0 個的區塊（保留預設的 6 個但清空）
+                const allBlocks = document.querySelectorAll('.mode-block');
+                allBlocks.forEach((block, index) => {
+                    if (index < 6) {
+                        // 保留前 6 個預設區塊，但清空內容
+                        const modeNum = index + 1;
+                        const nameInput = block.querySelector(`#mode-name-${modeNum}`);
+                        const codeInput = block.querySelector(`#mode-code-${modeNum}`);
+                        if (nameInput) nameInput.value = '';
+                        if (codeInput) codeInput.value = '';
+                    } else {
+                        // 移除第 7 個以後的區塊
+                        block.remove();
+                    }
+                });
+                modeCounter = 6;
+                console.log('⚠️ 資料庫中沒有模式資料，已清空所有區塊');
             }
         } catch (error) {
             console.warn('⚠️ 無法載入模式資料:', error.message);
