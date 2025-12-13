@@ -94,6 +94,34 @@ app.get('/api/questions', async (req, res) => {
   }
 });
 
+// Get single question by ID
+app.get('/api/questions/:id', async (req, res) => {
+  try {
+    await connectToDatabase();
+    const question = await Question.findById(req.params.id);
+    
+    if (!question) {
+      return res.status(404).json({
+        success: false,
+        message: 'Question not found',
+        error: `No question found with ID: ${req.params.id}`
+      });
+    }
+    
+    res.json({
+      success: true,
+      data: question
+    });
+  } catch (error) {
+    console.error('Error fetching question:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch question',
+      error: error.message
+    });
+  }
+});
+
 app.post('/api/questions', async (req, res) => {
   try {
     await connectToDatabase();
