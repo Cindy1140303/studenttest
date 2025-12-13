@@ -1466,7 +1466,7 @@
                                         </svg>
                                         複製連結
                                     </button>
-                                    <a href="code-drag-game.html?id=${q._id}" target="_blank" 
+                                    <a href="${window.location.pathname.includes('/studenttest/') ? '/studenttest/' : ''}code-drag-game.html?id=${q._id}" target="_blank" rel="noopener noreferrer"
                                        class="inline-flex items-center px-4 py-2 bg-amber-500 text-white rounded-lg hover:bg-amber-600 transition font-semibold shadow-md">
                                         <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"></path>
@@ -1581,7 +1581,8 @@
 
     // 複製題目連結到剪貼簿
     function copyQuestionLink(questionId) {
-        const link = `${window.location.origin}/code-drag-game.html?id=${questionId}`;
+        const basePath = window.location.pathname.includes('/studenttest/') ? '/studenttest/' : '/';
+        const link = `${window.location.origin}${basePath}code-drag-game.html?id=${questionId}`;
         
         // 使用現代剪貼簿 API
         if (navigator.clipboard && window.isSecureContext) {
