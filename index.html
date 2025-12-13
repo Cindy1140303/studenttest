@@ -236,7 +236,7 @@
             <div id="tab-mode" class="hidden">
                 <h3 class="text-xl font-semibold mb-8 text-gray-800 text-center">互動考題模式定義 (VUE Code)</h3>
 
-                <div id="modes-container" class="space-y-12">
+                <div id="modes-container" class="space-y-12 opacity-0 transition-opacity duration-300">
                     
                     <!-- Mode 1: 連連看 (Connect-the-Dots) -->
                     <div class="mode-block grid grid-cols-1 lg:grid-cols-2 gap-8 items-start p-4 border border-gray-200 rounded-xl bg-gray-50" data-mode-index="1">
@@ -1921,8 +1921,18 @@
                 modeCounter = 6;
                 console.log('⚠️ 資料庫中沒有模式資料，已清空所有區塊');
             }
+            
+            // 載入完成後顯示容器（避免閃現）
+            container.classList.remove('opacity-0');
+            container.classList.add('opacity-100');
         } catch (error) {
             console.warn('⚠️ 無法載入模式資料:', error.message);
+            // 即使出錯也要顯示容器
+            const container = document.getElementById('modes-container');
+            if (container) {
+                container.classList.remove('opacity-0');
+                container.classList.add('opacity-100');
+            }
         }
     }
 
