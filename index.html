@@ -1863,19 +1863,57 @@
             const result = await response.json();
             
             if (result.success && result.data.length > 0) {
+                // 清空現有的模式區塊（保留 HTML 中的前 6 個預設區塊）
+                const container = document.getElementById('modes-container');
+                
+                // 只填充資料庫中有的模式
                 result.data.forEach((mode, index) => {
                     const modeNum = index + 1;
-                    const nameInput = document.getElementById(`mode-name-${modeNum}`);
-                    const codeInput = document.getElementById(`mode-code-${modeNum}`);
                     
-                    if (nameInput && mode.name) {
-                        nameInput.value = mode.name;
-                    }
-                    if (codeInput && mode.code) {
-                        codeInput.value = mode.code;
+                    // 檢查該位置的區塊是否存在
+                    let existingBlock = document.querySelector(`.mode-block[data-mode-index="${modeNum}"]`);
+                    
+                    if (existingBlock) {
+                        // 如果區塊存在，只更新值
+                        const nameInput = existingBlock.querySelector(`#mode-name-${modeNum}`);
+                        const codeInput = existingBlock.querySelector(`#mode-code-${modeNum}`);
+                        
+                        if (nameInput) nameInput.value = mode.name || '';
+                        if (codeInput) codeInput.value = mode.code || '';
+                    } else {
+                        // 如果區塊不存在（超過前 6 個），創建新區塊
+                        const newBlock = createModeBlock(modeNum, mode.name || '', mode.code || '');
+                        container.appendChild(newBlock);
                     }
                 });
-                console.log('✅ 已載入模式資料');
+                
+                // 更新計數器
+                modeCounter = result.data.length;
+                
+                // 清空未被使用的預設區塊（如果資料庫模式少於 6 個）
+                for (let i = result.data.length + 1; i <= 6; i++) {
+                    const unusedBlock = document.querySelector(`.mode-block[data-mode-index="${i}"]`);
+                    if (unusedBlock) {
+                        const nameInput = unusedBlock.querySelector(`#mode-name-${i}`);
+                        const codeInput = unusedBlock.querySelector(`#mode-code-${i}`);
+                        if (nameInput) nameInput.value = '';
+                        if (codeInput) codeInput.value = '';
+                    }
+                }
+                
+                // 重新初始化圖示
+                lucide.createIcons();
+                
+                console.log(`✅ 已載入 ${result.data.length} 個模式資料`);
+            } else {
+                // 如果沒有資料，清空所有輸入框
+                for (let i = 1; i <= 6; i++) {
+                    const nameInput = document.getElementById(`mode-name-${i}`);
+                    const codeInput = document.getElementById(`mode-code-${i}`);
+                    if (nameInput) nameInput.value = '';
+                    if (codeInput) codeInput.value = '';
+                }
+                console.log('⚠️ 資料庫中沒有模式資料');
             }
         } catch (error) {
             console.warn('⚠️ 無法載入模式資料:', error.message);
