@@ -56,6 +56,16 @@
             font-family: 'Courier New', monospace;
             white-space: pre;
             flex-grow: 1;
+            margin-left: 0.5rem;
+        }
+        .code-block-placed {
+            padding: 0.75rem 1.25rem;
+            background-color: #dcfce7;
+            border: 2px solid #86efac;
+            border-radius: 0.5rem;
+            cursor: grab;
+            font-family: 'Courier New', monospace;
+            white-space: pre;
         }
     </style>
 </head>
@@ -145,13 +155,20 @@
             // 顯示題目內容
             document.getElementById('topic-context').textContent = currentQuestion.content || '請依照邏輯順序，將左側的程式碼片段拖曳到右側的框框中。';
 
-            // 解析選項為程式碼區塊
+            // 解析選項為程式碼區塊（格式：左側|右側）
             const codeLines = currentQuestion.options.split('\n').filter(line => line.trim());
-            currentQuestion.correctBlocks = codeLines.map((line, index) => ({
-                id: 100 + index,
-                text: line,
-                order: index
-            }));
+            currentQuestion.correctBlocks = codeLines.map((line, index) => {
+                const parts = line.split('|');
+                const leftText = parts[0] ? parts[0].trim() : '';
+                const rightText = parts[1] ? parts[1].trim() : '';
+                
+                return {
+                    id: 100 + index,
+                    text: leftText,  // 顯示左側文字供拖曳
+                    rightTarget: rightText,  // 右側目標文字（如果有預設值）
+                    order: index
+                };
+            });
 
             resetChallenge();
         }
@@ -208,15 +225,36 @@
 
                 if (draggedElement) {
                     currentSlots[targetSlotId] = blockId;
-                    targetSlot.innerHTML = '';
-                    targetSlot.appendChild(draggedElement);
-                    draggedElement.classList.add('slot-content');
+                    
+                    // 清空槽位但保留預設文字結構
+                    const slotContent = targetSlot.querySelector('.slot-content');
+                    if (slotContent) {
+                        // 有預設文字，放在它前面
+                        targetSlot.insertBefore(draggedElement, slotContent);
+                    } else {
+                        // 沒有預設文字，直接放入
+                        targetSlot.innerHTML = '';
+                        targetSlot.appendChild(draggedElement);
+                    }
+                    
+                    draggedElement.classList.remove('code-block');
+                    draggedElement.classList.add('code-block-placed');
 
                     if (fromSlotId) {
                         const originalSlotId = parseInt(fromSlotId);
                         const originalSlot = document.querySelector(`.drop-slot[data-slot-id="${originalSlotId}"]`);
                         if (originalSlot) {
+                            // 恢復原槽位的預設文字
+                            const block = currentQuestion.correctBlocks[originalSlotId];
                             originalSlot.innerHTML = '';
+                            if (block && block.rightTarget) {
+                                const targetContent = document.createElement('div');
+                                targetContent.className = 'slot-content';
+                                targetContent.textContent = block.rightTarget;
+                                originalSlot.appendChild(targetContent);
+                            } else {
+                                originalSlot.textContent = `${originalSlotId + 1}. (將程式碼拖曳至此)`;
+                            }
                             delete currentSlots[originalSlotId];
                         }
                     }
@@ -264,7 +302,16 @@
                 const slotElement = document.createElement('div');
                 slotElement.className = 'drop-slot';
                 slotElement.dataset.slotId = index;
-                slotElement.textContent = `${index + 1}. (將程式碼拖曳至此)`;
+                
+                // 如果有右側預設文字，顯示它；否則顯示提示
+                if (block.rightTarget) {
+                    const targetContent = document.createElement('div');
+                    targetContent.className = 'slot-content';
+                    targetContent.textContent = block.rightTarget;
+                    slotElement.appendChild(targetContent);
+                } else {
+                    slotElement.textContent = `${index + 1}. (將程式碼拖曳至此)`;
+                }
 
                 slotElement.addEventListener('dragenter', dragEnter);
                 slotElement.addEventListener('dragover', dragOver);
