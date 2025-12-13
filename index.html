@@ -184,9 +184,7 @@
                         <label for="knowledge-select" class="text-gray-600 whitespace-nowrap">知識點</label>
                         <div class="relative">
                             <select id="knowledge-select" class="input-style w-40 appearance-none focus:outline-none focus:ring-2 focus:ring-blue-500 pr-10">
-                                <option value="">請選擇知識點</option>
-                                <option value="calc">微積分</option>
-                                <option value="ancient" selected>古代文明</option>
+                                <option value="">全部知識點</option>
                             </select>
                             <i data-lucide="chevron-down" class="text-gray-500 absolute right-2 top-1/2 transform -translate-y-1/2 pointer-events-none w-5 h-5"></i>
                         </div>
@@ -671,6 +669,7 @@
             if (result.success) {
                 questionsData = result.data;
                 populateManagementCourses(); // 填充課別下拉選單
+                populateManagementKnowledge(); // 填充知識點下拉選單
                 renderQuestions();
                 console.log(`✅ 成功從後端 API 載入 ${result.data.length} 筆考題資料`);
             } else {
@@ -703,6 +702,36 @@
         // 恢復之前的選擇
         if (currentValue && courses.includes(currentValue)) {
             courseSelect.value = currentValue;
+        }
+    }
+    
+    // 填充考題管理的知識點下拉選單
+    function populateManagementKnowledge() {
+        const knowledgeSelect = document.getElementById('knowledge-select');
+        const courseSelect = document.getElementById('course-select');
+        const currentValue = knowledgeSelect.value; // 保存當前選擇
+        const selectedCourse = courseSelect.value;
+        
+        // 根據選擇的課別過濾知識點
+        let filteredQuestions = questionsData;
+        if (selectedCourse) {
+            filteredQuestions = questionsData.filter(q => q.course === selectedCourse);
+        }
+        
+        // 取得所有唯一的知識點
+        const knowledgePoints = [...new Set(filteredQuestions.map(q => q.knowledge))].filter(Boolean).sort();
+        
+        knowledgeSelect.innerHTML = '<option value="">全部知識點</option>';
+        knowledgePoints.forEach(knowledge => {
+            const option = document.createElement('option');
+            option.value = knowledge;
+            option.textContent = knowledge;
+            knowledgeSelect.appendChild(option);
+        });
+        
+        // 恢復之前的選擇（如果仍然存在）
+        if (currentValue && knowledgePoints.includes(currentValue)) {
+            knowledgeSelect.value = currentValue;
         }
     }
 
@@ -929,6 +958,11 @@
     });
 
     // ========== 新功能：查詢按鈕 ==========
+    // 課別選單變更時，更新知識點選單
+    document.getElementById('course-select').addEventListener('change', function() {
+        populateManagementKnowledge();
+    });
+    
     document.getElementById('query-button').addEventListener('click', function() {
         const course = document.getElementById('course-select').value;
         const knowledge = document.getElementById('knowledge-select').value;
