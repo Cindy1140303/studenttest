@@ -1805,8 +1805,22 @@
         const container = document.getElementById('modes-container');
         const newBlock = createModeBlock(modeCounter);
         
-        // 插入到按鈕區之前
-        container.appendChild(newBlock);
+        // 按照編號順序插入到正確位置
+        const allBlocks = container.querySelectorAll('.mode-block');
+        let inserted = false;
+        
+        allBlocks.forEach(block => {
+            const blockIndex = parseInt(block.dataset.modeIndex);
+            if (!inserted && blockIndex > modeCounter) {
+                container.insertBefore(newBlock, block);
+                inserted = true;
+            }
+        });
+        
+        // 如果沒有插入（新區塊編號最大），則添加到最後
+        if (!inserted) {
+            container.appendChild(newBlock);
+        }
         
         // 重新初始化圖示
         lucide.createIcons();
