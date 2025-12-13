@@ -283,6 +283,51 @@
                         </div>
                     </div>
 
+                    <!-- Mode 4: 多選題 (Multiple Choice) -->
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start p-4 border border-gray-200 rounded-xl bg-gray-50">
+                        <div class="flex items-start space-x-4">
+                            <span class="text-2xl font-mono pt-1 text-gray-500 w-8 text-right">4.</span>
+                            <div class="flex-grow">
+                                <label class="text-sm font-medium text-gray-600 mb-2 block">HTML/JS/CSS code(VUE)</label>
+                                <textarea id="mode-code-4" class="input-style w-full h-40 focus:outline-none focus:ring-2 focus:ring-orange-500 p-3 text-sm font-mono resize-none" placeholder="在此輸入 VUE 單檔案組件代碼（多選題模式）..."></textarea>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="text-sm font-medium text-gray-600 mb-2 block">對應模式名稱</label>
+                            <input id="mode-name-4" type="text" value="多選題" class="input-style w-full text-lg font-bold text-center py-4 bg-yellow-200 border-yellow-500 text-gray-800 focus:outline-none focus:ring-2 focus:ring-orange-500">
+                        </div>
+                    </div>
+
+                    <!-- Mode 5: 是非題 (True/False) -->
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start p-4 border border-gray-200 rounded-xl bg-gray-50">
+                        <div class="flex items-start space-x-4">
+                            <span class="text-2xl font-mono pt-1 text-gray-500 w-8 text-right">5.</span>
+                            <div class="flex-grow">
+                                <label class="text-sm font-medium text-gray-600 mb-2 block">HTML/JS/CSS code(VUE)</label>
+                                <textarea id="mode-code-5" class="input-style w-full h-40 focus:outline-none focus:ring-2 focus:ring-orange-500 p-3 text-sm font-mono resize-none" placeholder="在此輸入 VUE 單檔案組件代碼（是非題模式）..."></textarea>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="text-sm font-medium text-gray-600 mb-2 block">對應模式名稱</label>
+                            <input id="mode-name-5" type="text" value="是非題" class="input-style w-full text-lg font-bold text-center py-4 bg-yellow-200 border-yellow-500 text-gray-800 focus:outline-none focus:ring-2 focus:ring-orange-500">
+                        </div>
+                    </div>
+
+                    <!-- Mode 6: 填空題 (Fill in the Blank) -->
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start p-4 border border-gray-200 rounded-xl bg-gray-50">
+                        <div class="flex items-start space-x-4">
+                            <span class="text-2xl font-mono pt-1 text-gray-500 w-8 text-right">6.</span>
+                            <div class="flex-grow">
+                                <label class="text-sm font-medium text-gray-600 mb-2 block">HTML/JS/CSS code(VUE)</label>
+                                <textarea id="mode-code-6" class="input-style w-full h-40 focus:outline-none focus:ring-2 focus:ring-orange-500 p-3 text-sm font-mono resize-none" placeholder="在此輸入 VUE 單檔案組件代碼（填空題模式）..."></textarea>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="text-sm font-medium text-gray-600 mb-2 block">對應模式名稱</label>
+                            <input id="mode-name-6" type="text" value="填空題" class="input-style w-full text-lg font-bold text-center py-4 bg-yellow-200 border-yellow-500 text-gray-800 focus:outline-none focus:ring-2 focus:ring-orange-500">
+                        </div>
+                    </div>
+
                     <!-- 儲存按鈕 -->
                     <div class="flex justify-center mt-8">
                         <button id="save-modes-button" class="action-button bg-gradient-to-r from-orange-400 to-pink-500 hover:from-orange-500 hover:to-pink-600 text-white px-12 py-4 text-lg">
@@ -1674,18 +1719,23 @@
     document.getElementById('save-modes-button').addEventListener('click', async function() {
         const modes = [];
         
-        // 收集所有模式資料
-        for (let i = 1; i <= 3; i++) {
-            const name = document.getElementById(`mode-name-${i}`).value.trim();
-            const code = document.getElementById(`mode-code-${i}`).value.trim();
+        // 收集所有模式資料（支援 6 個模式）
+        for (let i = 1; i <= 6; i++) {
+            const nameInput = document.getElementById(`mode-name-${i}`);
+            const codeInput = document.getElementById(`mode-code-${i}`);
             
-            if (name) {
-                modes.push({
-                    name: name,
-                    code: code || '',
-                    description: `${name}模式`,
-                    order: i
-                });
+            if (nameInput) {
+                const name = nameInput.value.trim();
+                const code = codeInput ? codeInput.value.trim() : '';
+                
+                if (name) {
+                    modes.push({
+                        name: name,
+                        code: code || '',
+                        description: `${name}模式`,
+                        order: i
+                    });
+                }
             }
         }
         
