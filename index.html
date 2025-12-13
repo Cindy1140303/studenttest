@@ -363,38 +363,29 @@
                     </div>
                     
                     <!-- 拖拉方塊專用編輯器 -->
-                    <div id="new-drag-block-editor" class="hidden space-y-4">
-                        <div class="bg-amber-50 border border-amber-200 rounded-lg p-4">
-                            <label class="block text-sm font-medium text-gray-700 mb-2">
-                                📝 題目設定（在需要放答案的地方輸入 [空格] ）
-                            </label>
-                            <textarea id="new-drag-question-text" class="input-style w-full h-24" placeholder="例如：Python 中定義函式使用 [空格] 關鍵字，而迴圈使用 [空格] 關鍵字。"></textarea>
-                            <p class="text-xs text-gray-500 mt-2">💡 提示：在需要學生拖放答案的位置輸入 [空格]</p>
-                        </div>
-                        
-                        <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                            <div class="flex items-center justify-between mb-3">
-                                <label class="text-sm font-medium text-gray-700">📦 答案選項</label>
-                                <button type="button" id="new-add-drag-option" class="bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded-lg text-sm font-semibold">
-                                    ➕ 新增選項
+                    <div id="new-drag-block-editor" class="hidden">
+                        <div class="bg-pink-50 border border-pink-200 rounded-lg p-6">
+                            <div class="flex items-center justify-between mb-4">
+                                <label class="text-lg font-bold text-gray-800">📝 拖拉方塊設定</label>
+                                <button type="button" id="new-add-drag-pair" class="bg-amber-600 hover:bg-amber-700 text-white px-6 py-2 rounded-lg font-bold text-xl shadow-lg">
+                                    ➕ 新增配對
                                 </button>
                             </div>
-                            <div id="new-drag-options-list" class="space-y-2">
-                                <!-- 答案選項將動態添加 -->
+                            
+                            <p class="text-sm text-gray-600 mb-4">設定答案選項與對應的題目內文</p>
+                            
+                            <!-- 配對列表 -->
+                            <div id="new-drag-pairs-container" class="space-y-4">
+                                <!-- 動態生成的配對將顯示在這裡 -->
                             </div>
-                        </div>
-                        
-                        <div class="bg-purple-50 border border-purple-200 rounded-lg p-4">
-                            <label class="block text-sm font-medium text-gray-700 mb-2">🎯 正確答案順序</label>
-                            <input type="text" id="new-drag-correct-answers" class="input-style w-full" placeholder="例如：def,for,while（用逗號分隔，順序對應題目中的 [空格]）" readonly>
-                            <p class="text-xs text-gray-500 mt-2">此欄位會自動根據答案選項的順序生成</p>
-                        </div>
-                        
-                        <!-- 預覽區 -->
-                        <div class="bg-gray-50 border border-gray-300 rounded-lg p-4">
-                            <label class="block text-sm font-medium text-gray-700 mb-2">👁️ 預覽效果</label>
-                            <div id="new-drag-preview" class="bg-white p-4 rounded min-h-[100px]">
-                                <p class="text-gray-400 text-sm">設定題目和選項後會顯示預覽</p>
+                            
+                            <div class="mt-4 p-3 bg-white rounded border border-gray-300">
+                                <p class="text-xs text-gray-500">
+                                    <strong>說明：</strong><br>
+                                    • 左側：學生可拖拉的答案選項<br>
+                                    • 右側：題目中需要填入答案的位置<br>
+                                    • 系統會自動驗證答案是否正確
+                                </p>
                             </div>
                         </div>
                     </div>
@@ -789,8 +780,7 @@
     };
 
     // 拖拉方塊編輯器狀態
-    let newDragOptions = [];
-    let newDragQuestionText = '';
+    let newDragPairs = [];
 
     // 更新題型格式提示（新增表單）
     document.getElementById('new-type').addEventListener('change', function() {
@@ -836,75 +826,68 @@
         }
     });
 
-    // 拖拉方塊編輯器：新增選項
-    document.getElementById('new-add-drag-option').addEventListener('click', function() {
-        const optionText = prompt('請輸入答案選項內容：');
-        if (optionText && optionText.trim()) {
-            newDragOptions.push(optionText.trim());
-            renderNewDragOptions();
-            updateNewDragPreview();
-        }
+    // 拖拉方塊編輯器：新增配對
+    document.getElementById('new-add-drag-pair').addEventListener('click', function() {
+        newDragPairs.push({ option: '', content: '' });
+        renderNewDragPairs();
     });
 
-    // 渲染拖拉方塊選項列表
-    function renderNewDragOptions() {
-        const container = document.getElementById('new-drag-options-list');
+    // 渲染拖拉方塊配對列表
+    function renderNewDragPairs() {
+        const container = document.getElementById('new-drag-pairs-container');
         container.innerHTML = '';
         
-        if (newDragOptions.length === 0) {
-            container.innerHTML = '<p class="text-gray-400 text-sm">尚未新增任何選項</p>';
+        if (newDragPairs.length === 0) {
+            container.innerHTML = '<p class="text-gray-400 text-center py-8">點擊「➕ 新增配對」開始設定</p>';
             return;
         }
         
-        newDragOptions.forEach((option, index) => {
-            const optionDiv = document.createElement('div');
-            optionDiv.className = 'flex items-center justify-between bg-white px-3 py-2 rounded border border-blue-300';
-            optionDiv.innerHTML = `
-                <span class="font-mono text-sm">${index + 1}. ${option}</span>
-                <button type="button" onclick="removeNewDragOption(${index})" class="text-red-500 hover:text-red-700 font-bold">✕</button>
+        newDragPairs.forEach((pair, index) => {
+            const pairDiv = document.createElement('div');
+            pairDiv.className = 'grid grid-cols-2 gap-4 p-4 bg-white rounded-lg border-2 border-gray-300 relative';
+            pairDiv.innerHTML = `
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">答案選項</label>
+                    <input type="text" 
+                           data-pair-index="${index}" 
+                           data-field="option"
+                           value="${pair.option}"
+                           class="input-style w-full drag-pair-input" 
+                           placeholder="輸入答案（如：Apple、def、Dog）">
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">題目內文</label>
+                    <input type="text" 
+                           data-pair-index="${index}" 
+                           data-field="content"
+                           value="${pair.content}"
+                           class="input-style w-full drag-pair-input" 
+                           placeholder="輸入題目敘述（如：蘋果|Apple、函式定義關鍵字）">
+                </div>
+                <button type="button" 
+                        onclick="removeNewDragPair(${index})" 
+                        class="absolute -top-2 -right-2 bg-red-500 hover:bg-red-600 text-white rounded-full w-8 h-8 flex items-center justify-center font-bold shadow-lg">
+                    ✕
+                </button>
             `;
-            container.appendChild(optionDiv);
+            container.appendChild(pairDiv);
         });
         
-        // 更新正確答案
-        document.getElementById('new-drag-correct-answers').value = newDragOptions.join(',');
-    }
-
-    // 刪除選項
-    function removeNewDragOption(index) {
-        newDragOptions.splice(index, 1);
-        renderNewDragOptions();
-        updateNewDragPreview();
-    }
-
-    // 更新預覽
-    function updateNewDragPreview() {
-        const questionText = document.getElementById('new-drag-question-text').value;
-        const preview = document.getElementById('new-drag-preview');
-        
-        if (!questionText) {
-            preview.innerHTML = '<p class="text-gray-400 text-sm">設定題目和選項後會顯示預覽</p>';
-            return;
-        }
-        
-        // 將 [空格] 替換為可拖放區域
-        let previewHTML = questionText.replace(/\[空格\]/g, '<span class="inline-block border-2 border-dashed border-gray-400 bg-yellow-50 px-4 py-1 mx-1 rounded min-w-[100px] text-center text-gray-400 text-sm">拖放區</span>');
-        
-        // 顯示可用選項
-        let optionsHTML = '<div class="mt-4"><div class="text-sm font-semibold text-gray-700 mb-2">可拖放的選項：</div><div class="flex flex-wrap gap-2">';
-        newDragOptions.forEach(option => {
-            optionsHTML += `<span class="bg-blue-100 border border-blue-300 px-3 py-1 rounded font-mono text-sm">${option}</span>`;
+        // 綁定輸入事件
+        document.querySelectorAll('.drag-pair-input').forEach(input => {
+            input.addEventListener('input', function() {
+                const index = parseInt(this.dataset.pairIndex);
+                const field = this.dataset.field;
+                newDragPairs[index][field] = this.value;
+            });
         });
-        optionsHTML += '</div></div>';
-        
-        preview.innerHTML = '<div class="text-gray-800">' + previewHTML + optionsHTML + '</div>';
     }
 
-    // 監聽題目文字變化
-    document.getElementById('new-drag-question-text').addEventListener('input', function() {
-        newDragQuestionText = this.value;
-        updateNewDragPreview();
-    });
+    // 刪除配對
+    function removeNewDragPair(index) {
+        newDragPairs.splice(index, 1);
+        renderNewDragPairs();
+    }
 
     // 更新題型格式提示（編輯表單）
     document.getElementById('edit-type').addEventListener('change', function() {
@@ -957,14 +940,20 @@
         
         // 如果是拖拉方塊，從編輯器獲取數據
         if (questionType === '拖拉方塊') {
-            const questionText = document.getElementById('new-drag-question-text').value;
-            if (!questionText || newDragOptions.length === 0) {
-                showMessage('❌ 請設定題目文字和答案選項');
+            if (newDragPairs.length === 0) {
+                showMessage('❌ 請至少新增一組配對');
                 return;
             }
             
-            // 格式：題目文字@@@@選項1,選項2,選項3
-            options = questionText + '@@@@' + newDragOptions.join(',');
+            // 檢查是否所有配對都已填寫
+            const hasEmpty = newDragPairs.some(pair => !pair.option.trim() || !pair.content.trim());
+            if (hasEmpty) {
+                showMessage('❌ 請填寫完整所有配對的內容');
+                return;
+            }
+            
+            // 格式：選項1|內文1\n選項2|內文2\n選項3|內文3
+            options = newDragPairs.map(pair => `${pair.option.trim()}|${pair.content.trim()}`).join('\n');
             answer = 'auto';
         } else {
             options = document.getElementById('new-options').value;
@@ -998,10 +987,8 @@
                 addModal.classList.remove('flex');
                 addForm.reset();
                 // 清空拖拉方塊編輯器
-                newDragOptions = [];
-                newDragQuestionText = '';
-                renderNewDragOptions();
-                updateNewDragPreview();
+                newDragPairs = [];
+                renderNewDragPairs();
                 fetchQuestions(); // 重新載入資料
             } else {
                 showMessage('❌ 新增失敗：' + result.message);
