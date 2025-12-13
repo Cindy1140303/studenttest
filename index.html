@@ -368,45 +368,25 @@
                             <div class="flex items-center justify-between mb-6">
                                 <div>
                                     <label class="text-xl font-bold text-amber-900">📝 程式片段拖拉設定</label>
-                                    <p class="text-sm text-amber-700 mt-1">按照正確順序新增程式碼片段</p>
+                                    <p class="text-sm text-amber-700 mt-1">設定左側可拖拉片段與右側目標位置</p>
                                 </div>
-                                <button type="button" id="new-add-code-block" class="bg-amber-600 hover:bg-amber-700 text-white px-6 py-3 rounded-lg font-bold text-lg shadow-lg transform hover:scale-105 transition">
-                                    ➕ 新增程式片段
+                                <button type="button" id="new-add-drag-row" class="bg-amber-600 hover:bg-amber-700 text-white px-6 py-3 rounded-lg font-bold text-lg shadow-lg transform hover:scale-105 transition">
+                                    ➕ 新增一組
                                 </button>
                             </div>
                             
-                            <!-- 左右分欄預覽 -->
-                            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                                <!-- 左側：程式片段 -->
-                                <div class="bg-white rounded-lg p-4 border-2 border-amber-300 shadow-md">
-                                    <h3 class="text-lg font-bold text-amber-800 mb-3 flex items-center">
-                                        <span class="bg-amber-500 text-white px-2 py-1 rounded mr-2 text-sm">左側</span>
-                                        程式碼片段
-                                    </h3>
-                                    <div id="new-code-blocks-list" class="space-y-2 min-h-[300px]">
-                                        <!-- 程式片段將顯示在這裡 -->
-                                    </div>
-                                </div>
-                                
-                                <!-- 右側：回答區預覽 -->
-                                <div class="bg-white rounded-lg p-4 border-2 border-blue-300 shadow-md">
-                                    <h3 class="text-lg font-bold text-blue-800 mb-3 flex items-center">
-                                        <span class="bg-blue-500 text-white px-2 py-1 rounded mr-2 text-sm">右側</span>
-                                        回答區（學生拖拉目標）
-                                    </h3>
-                                    <div id="new-answer-slots-preview" class="space-y-2 min-h-[300px]">
-                                        <!-- 編號槽位預覽 -->
-                                    </div>
-                                </div>
+                            <!-- 配對列表 -->
+                            <div id="new-drag-pairs-list" class="space-y-4 mb-4">
+                                <!-- 動態生成的配對將顯示在這裡 -->
                             </div>
                             
                             <div class="mt-4 p-4 bg-amber-100 rounded-lg border border-amber-300">
                                 <p class="text-sm text-amber-900">
                                     <strong>💡 提示：</strong><br>
-                                    • 按照<strong>正確順序</strong>新增程式碼片段<br>
-                                    • 學生答題時，左側片段會被<strong>隨機打亂</strong><br>
-                                    • 學生需要將片段拖到右側對應的位置<br>
-                                    • 系統會自動驗證順序是否正確
+                                    • <strong>左側片段</strong>：學生可以拖拉的程式碼（會被隨機打亂）<br>
+                                    • <strong>右側槽位</strong>：可留空（拖放區）或填入預設程式碼<br>
+                                    • 順序對應：第1組左側對應第1個右側槽位，以此類推<br>
+                                    • 右側留空時顯示為虛線框，學生需要拖入正確片段
                                 </p>
                             </div>
                         </div>
@@ -483,36 +463,19 @@
                             <div class="flex items-center justify-between mb-6">
                                 <div>
                                     <label class="text-xl font-bold text-amber-900">📝 程式片段拖拉設定</label>
-                                    <p class="text-sm text-amber-700 mt-1">按照正確順序新增程式碼片段</p>
+                                    <p class="text-sm text-amber-700 mt-1">設定左側可拖拉片段與右側目標位置</p>
                                 </div>
-                                <button type="button" id="edit-add-code-block" class="bg-amber-600 hover:bg-amber-700 text-white px-6 py-3 rounded-lg font-bold text-lg shadow-lg transform hover:scale-105 transition">
-                                    ➕ 新增程式片段
+                                <button type="button" id="edit-add-drag-row" class="bg-amber-600 hover:bg-amber-700 text-white px-6 py-3 rounded-lg font-bold text-lg shadow-lg transform hover:scale-105 transition">
+                                    ➕ 新增一組
                                 </button>
                             </div>
                             
                             <!-- 左右分欄預覽 -->
                             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                                <!-- 左側：程式片段 -->
-                                <div class="bg-white rounded-lg p-4 border-2 border-amber-300 shadow-md">
-                                    <h3 class="text-lg font-bold text-amber-800 mb-3 flex items-center">
-                                        <span class="bg-amber-500 text-white px-2 py-1 rounded mr-2 text-sm">左側</span>
-                                        程式碼片段
-                                    </h3>
-                                    <div id="edit-code-blocks-list" class="space-y-2 min-h-[300px]">
-                                        <!-- 程式片段將顯示在這裡 -->
-                                    </div>
-                                </div>
-                                
-                                <!-- 右側：回答區預覽 -->
-                                <div class="bg-white rounded-lg p-4 border-2 border-blue-300 shadow-md">
-                                    <h3 class="text-lg font-bold text-blue-800 mb-3 flex items-center">
-                                        <span class="bg-blue-500 text-white px-2 py-1 rounded mr-2 text-sm">右側</span>
-                                        回答區（學生拖拉目標）
-                                    </h3>
-                                    <div id="edit-answer-slots-preview" class="space-y-2 min-h-[300px]">
-                                        <!-- 編號槽位預覽 -->
-                                    </div>
-                                </div>
+                                <!-- 配對列表 -->
+                            <div id="edit-drag-pairs-list" class="space-y-4 mb-4">
+                                <!-- 動態生成的配對將顯示在這裡 -->
+                            </div>
                             </div>
                             
                             <div class="mt-4 p-4 bg-amber-100 rounded-lg border border-amber-300">
@@ -732,13 +695,21 @@
             document.getElementById('edit-standard-fields').classList.add('hidden');
             document.getElementById('edit-drag-block-editor').classList.remove('hidden');
             
-            // 解析現有數據
+            // 解析現有數據：左側|右側\n左側|右側
             if (question.options && question.options.trim()) {
-                editDragPairs = question.options.split('\n').filter(line => line.trim());
-                renderEditCodeBlocks();
+                editDragPairs = question.options.split('\n')
+                    .filter(line => line.trim())
+                    .map(line => {
+                        const parts = line.split('|');
+                        return {
+                            left: parts[0] || '',
+                            right: parts[1] || ''
+                        };
+                    });
+                renderEditDragPairs();
             } else {
                 editDragPairs = [];
-                renderEditCodeBlocks();
+                renderEditDragPairs();
             }
         } else {
             document.getElementById('edit-standard-fields').classList.remove('hidden');
@@ -761,10 +732,19 @@
         // 如果是拖拉方塊，從編輯器獲取數據
         if (questionType === '拖拉方塊') {
             if (editDragPairs.length === 0) {
-                showMessage('❌ 請至少新增一個程式片段');
+                showMessage('❌ 請至少新增一組配對');
                 return;
             }
-            options = editDragPairs.join('\n');
+            
+            // 檢查左側是否都有填寫
+            const hasEmptyLeft = editDragPairs.some(pair => !pair.left.trim());
+            if (hasEmptyLeft) {
+                showMessage('❌ 左側程式片段不能為空');
+                return;
+            }
+            
+            // 格式：左側|右側\n左側|右側（右側可以為空）
+            options = editDragPairs.map(pair => `${pair.left.trim()}|${pair.right.trim()}`).join('\n');
             answer = 'auto';
         } else {
             options = document.getElementById('edit-options').value;
@@ -890,7 +870,7 @@
     };
 
     // 拖拉方塊編輯器狀態
-    let newDragPairs = [];
+    let newDragPairs = []; // 格式：[{left: '', right: ''}, ...]
 
     // 更新題型格式提示（新增表單）
     document.getElementById('new-type').addEventListener('change', function() {
@@ -936,178 +916,220 @@
         }
     });
 
-    // 拖拉方塊編輯器：新增程式片段
-    document.getElementById('new-add-code-block').addEventListener('click', function() {
-        const code = prompt('請輸入程式碼片段：');
-        if (code !== null && code.trim()) {
-            newDragPairs.push(code.trim());
-            renderNewCodeBlocks();
-        }
+    // 拖拉方塊編輯器：新增一組配對
+    document.getElementById('new-add-drag-row').addEventListener('click', function() {
+        newDragPairs.push({ left: '', right: '' });
+        renderNewDragPairs();
     });
 
-    // 渲染程式碼片段列表
-    function renderNewCodeBlocks() {
-        const blocksContainer = document.getElementById('new-code-blocks-list');
-        const slotsContainer = document.getElementById('new-answer-slots-preview');
+    // 渲染配對列表
+    function renderNewDragPairs() {
+        const container = document.getElementById('new-drag-pairs-list');
         
         if (newDragPairs.length === 0) {
-            blocksContainer.innerHTML = '<p class="text-gray-400 text-center py-8">點擊「➕ 新增程式片段」開始設定</p>';
-            slotsContainer.innerHTML = '<p class="text-gray-400 text-center py-8">新增程式片段後會顯示回答區</p>';
+            container.innerHTML = '<p class="text-gray-400 text-center py-8 border-2 border-dashed border-gray-300 rounded-lg">點擊「➕ 新增一組」開始設定</p>';
             return;
         }
         
-        // 渲染左側程式片段（顯示為已打亂的樣子）
-        blocksContainer.innerHTML = '';
-        const shuffledDisplay = [...newDragPairs].sort(() => Math.random() - 0.5);
-        shuffledDisplay.forEach((code, index) => {
-            const blockDiv = document.createElement('div');
-            blockDiv.className = 'bg-sky-50 border-2 border-sky-300 rounded-lg p-3 font-mono text-sm relative group hover:bg-sky-100 transition';
-            blockDiv.innerHTML = `
-                <div class="pr-8">${code}</div>
+        container.innerHTML = '';
+        newDragPairs.forEach((pair, index) => {
+            const pairDiv = document.createElement('div');
+            pairDiv.className = 'grid grid-cols-12 gap-4 items-start p-4 bg-white rounded-lg border-2 border-gray-300 relative';
+            pairDiv.innerHTML = `
+                <div class="col-span-1 flex items-center justify-center">
+                    <span class="text-2xl font-bold text-gray-400">${index + 1}</span>
+                </div>
+                <div class="col-span-5">
+                    <label class="block text-sm font-bold text-amber-700 mb-2">
+                        <span class="bg-amber-500 text-white px-2 py-1 rounded text-xs mr-1">左側</span>
+                        程式片段（可拖拉）
+                    </label>
+                    <textarea data-pair-index="${index}" 
+                              data-field="left"
+                              class="input-style w-full h-20 font-mono text-sm drag-pair-input resize-y" 
+                              placeholder="輸入程式碼片段，如：p = 2"></textarea>
+                </div>
+                <div class="col-span-5">
+                    <label class="block text-sm font-bold text-blue-700 mb-2">
+                        <span class="bg-blue-500 text-white px-2 py-1 rounded text-xs mr-1">右側</span>
+                        槽位內容（留空或預設程式碼）
+                    </label>
+                    <textarea data-pair-index="${index}" 
+                              data-field="right"
+                              class="input-style w-full h-20 font-mono text-sm drag-pair-input resize-y" 
+                              placeholder="留空表示拖放區，或輸入預設程式碼，如：if is_prime == True:"></textarea>
+                </div>
+                <div class="col-span-1 flex flex-col gap-2">
+                    <button type="button" 
+                            onclick="removeNewDragPair(${index})" 
+                            class="bg-red-500 hover:bg-red-600 text-white rounded-full w-8 h-8 flex items-center justify-center font-bold shadow-md"
+                            title="刪除">
+                        ✕
+                    </button>
+                    ${index > 0 ? `
+                    <button type="button" 
+                            onclick="moveNewDragPair(${index}, 'up')" 
+                            class="bg-blue-500 hover:bg-blue-600 text-white rounded w-8 h-8 flex items-center justify-center font-bold shadow-md"
+                            title="上移">
+                        ↑
+                    </button>
+                    ` : ''}
+                    ${index < newDragPairs.length - 1 ? `
+                    <button type="button" 
+                            onclick="moveNewDragPair(${index}, 'down')" 
+                            class="bg-blue-500 hover:bg-blue-600 text-white rounded w-8 h-8 flex items-center justify-center font-bold shadow-md"
+                            title="下移">
+                        ↓
+                    </button>
+                    ` : ''}
+                </div>
             `;
-            blocksContainer.appendChild(blockDiv);
+            container.appendChild(pairDiv);
         });
         
-        // 渲染右側回答槽位（顯示編號）
-        slotsContainer.innerHTML = '';
-        newDragPairs.forEach((code, index) => {
-            const slotDiv = document.createElement('div');
-            slotDiv.className = 'border-2 border-dashed border-gray-400 bg-gray-50 rounded-lg p-3 flex items-center min-h-[50px]';
-            slotDiv.innerHTML = `
-                <span class="text-gray-500 font-semibold">${index + 1}. (將程式碼拖曳至此)</span>
-            `;
-            slotsContainer.appendChild(slotDiv);
+        // 設定輸入框的值
+        newDragPairs.forEach((pair, index) => {
+            const leftInput = container.querySelector(`textarea[data-pair-index="${index}"][data-field="left"]`);
+            const rightInput = container.querySelector(`textarea[data-pair-index="${index}"][data-field="right"]`);
+            if (leftInput) leftInput.value = pair.left;
+            if (rightInput) rightInput.value = pair.right;
         });
         
-        // 添加刪除按鈕到左側列表（實際可操作的列表）
-        blocksContainer.innerHTML = '';
-        newDragPairs.forEach((code, index) => {
-            const blockDiv = document.createElement('div');
-            blockDiv.className = 'bg-sky-50 border-2 border-sky-300 rounded-lg p-3 font-mono text-sm relative group hover:bg-sky-100 transition';
-            blockDiv.innerHTML = `
-                <div class="pr-8 break-all">${code}</div>
-                <button type="button" 
-                        onclick="removeCodeBlock(${index})" 
-                        class="absolute top-2 right-2 bg-red-500 hover:bg-red-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold opacity-0 group-hover:opacity-100 transition">
-                    ✕
-                </button>
-                ${index < newDragPairs.length - 1 ? `
-                <button type="button" 
-                        onclick="moveCodeBlock(${index}, 'down')" 
-                        class="absolute bottom-2 right-2 bg-blue-500 hover:bg-blue-600 text-white rounded px-2 py-1 text-xs font-bold opacity-0 group-hover:opacity-100 transition">
-                    ↓
-                </button>
-                ` : ''}
-                ${index > 0 ? `
-                <button type="button" 
-                        onclick="moveCodeBlock(${index}, 'up')" 
-                        class="absolute bottom-2 right-10 bg-blue-500 hover:bg-blue-600 text-white rounded px-2 py-1 text-xs font-bold opacity-0 group-hover:opacity-100 transition">
-                    ↑
-                </button>
-                ` : ''}
-            `;
-            blocksContainer.appendChild(blockDiv);
+        // 綁定輸入事件
+        container.querySelectorAll('.drag-pair-input').forEach(input => {
+            input.addEventListener('input', function() {
+                const index = parseInt(this.dataset.pairIndex);
+                const field = this.dataset.field;
+                newDragPairs[index][field] = this.value;
+            });
         });
     }
 
-    // 刪除程式片段
-    function removeCodeBlock(index) {
+    // 刪除配對
+    function removeNewDragPair(index) {
         newDragPairs.splice(index, 1);
-        renderNewCodeBlocks();
+        renderNewDragPairs();
     }
 
-    // 移動程式片段順序
-    function moveCodeBlock(index, direction) {
+    // 移動配對順序
+    function moveNewDragPair(index, direction) {
         if (direction === 'up' && index > 0) {
             [newDragPairs[index], newDragPairs[index - 1]] = [newDragPairs[index - 1], newDragPairs[index]];
         } else if (direction === 'down' && index < newDragPairs.length - 1) {
             [newDragPairs[index], newDragPairs[index + 1]] = [newDragPairs[index + 1], newDragPairs[index]];
         }
-        renderNewCodeBlocks();
+        renderNewDragPairs();
     }
 
     // === 編輯表單的拖拉方塊編輯器功能 ===
     
-    // 新增程式片段（編輯表單）
-    document.getElementById('edit-add-code-block').addEventListener('click', function() {
-        const code = prompt('請輸入程式碼片段：');
-        if (code !== null && code.trim()) {
-            editDragPairs.push(code.trim());
-            renderEditCodeBlocks();
-        }
+    // 新增一組配對（編輯表單）
+    document.getElementById('edit-add-drag-row').addEventListener('click', function() {
+        editDragPairs.push({ left: '', right: '' });
+        renderEditDragPairs();
     });
 
-    // 渲染程式碼片段列表（編輯表單）
-    function renderEditCodeBlocks() {
-        const blocksContainer = document.getElementById('edit-code-blocks-list');
-        const slotsContainer = document.getElementById('edit-answer-slots-preview');
+    // 渲染配對列表（編輯表單）
+    function renderEditDragPairs() {
+        const container = document.getElementById('edit-drag-pairs-list');
         
         if (editDragPairs.length === 0) {
-            blocksContainer.innerHTML = '<p class="text-gray-400 text-center py-8">點擊「➕ 新增程式片段」開始設定</p>';
-            slotsContainer.innerHTML = '<p class="text-gray-400 text-center py-8">新增程式片段後會顯示回答區</p>';
+            container.innerHTML = '<p class="text-gray-400 text-center py-8 border-2 border-dashed border-gray-300 rounded-lg">點擊「➕ 新增一組」開始設定</p>';
             return;
         }
         
-        // 渲染右側回答槽位（顯示編號）
-        slotsContainer.innerHTML = '';
-        editDragPairs.forEach((code, index) => {
-            const slotDiv = document.createElement('div');
-            slotDiv.className = 'border-2 border-dashed border-gray-400 bg-gray-50 rounded-lg p-3 flex items-center min-h-[50px]';
-            slotDiv.innerHTML = `
-                <span class="text-gray-500 font-semibold">${index + 1}. (將程式碼拖曳至此)</span>
+        container.innerHTML = '';
+        editDragPairs.forEach((pair, index) => {
+            const pairDiv = document.createElement('div');
+            pairDiv.className = 'grid grid-cols-12 gap-4 items-start p-4 bg-white rounded-lg border-2 border-gray-300 relative';
+            pairDiv.innerHTML = `
+                <div class="col-span-1 flex items-center justify-center">
+                    <span class="text-2xl font-bold text-gray-400">${index + 1}</span>
+                </div>
+                <div class="col-span-5">
+                    <label class="block text-sm font-bold text-amber-700 mb-2">
+                        <span class="bg-amber-500 text-white px-2 py-1 rounded text-xs mr-1">左側</span>
+                        程式片段（可拖拉）
+                    </label>
+                    <textarea data-pair-index="${index}" 
+                              data-field="left"
+                              class="input-style w-full h-20 font-mono text-sm edit-drag-pair-input resize-y" 
+                              placeholder="輸入程式碼片段，如：p = 2"></textarea>
+                </div>
+                <div class="col-span-5">
+                    <label class="block text-sm font-bold text-blue-700 mb-2">
+                        <span class="bg-blue-500 text-white px-2 py-1 rounded text-xs mr-1">右側</span>
+                        槽位內容（留空或預設程式碼）
+                    </label>
+                    <textarea data-pair-index="${index}" 
+                              data-field="right"
+                              class="input-style w-full h-20 font-mono text-sm edit-drag-pair-input resize-y" 
+                              placeholder="留空表示拖放區，或輸入預設程式碼，如：if is_prime == True:"></textarea>
+                </div>
+                <div class="col-span-1 flex flex-col gap-2">
+                    <button type="button" 
+                            onclick="removeEditDragPair(${index})" 
+                            class="bg-red-500 hover:bg-red-600 text-white rounded-full w-8 h-8 flex items-center justify-center font-bold shadow-md"
+                            title="刪除">
+                        ✕
+                    </button>
+                    ${index > 0 ? `
+                    <button type="button" 
+                            onclick="moveEditDragPair(${index}, 'up')" 
+                            class="bg-blue-500 hover:bg-blue-600 text-white rounded w-8 h-8 flex items-center justify-center font-bold shadow-md"
+                            title="上移">
+                        ↑
+                    </button>
+                    ` : ''}
+                    ${index < editDragPairs.length - 1 ? `
+                    <button type="button" 
+                            onclick="moveEditDragPair(${index}, 'down')" 
+                            class="bg-blue-500 hover:bg-blue-600 text-white rounded w-8 h-8 flex items-center justify-center font-bold shadow-md"
+                            title="下移">
+                        ↓
+                    </button>
+                    ` : ''}
+                </div>
             `;
-            slotsContainer.appendChild(slotDiv);
+            container.appendChild(pairDiv);
         });
         
-        // 渲染左側列表（實際可操作的列表）
-        blocksContainer.innerHTML = '';
-        editDragPairs.forEach((code, index) => {
-            const blockDiv = document.createElement('div');
-            blockDiv.className = 'bg-sky-50 border-2 border-sky-300 rounded-lg p-3 font-mono text-sm relative group hover:bg-sky-100 transition';
-            blockDiv.innerHTML = `
-                <div class="pr-8 break-all">${code}</div>
-                <button type="button" 
-                        onclick="removeEditCodeBlock(${index})" 
-                        class="absolute top-2 right-2 bg-red-500 hover:bg-red-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold opacity-0 group-hover:opacity-100 transition">
-                    ✕
-                </button>
-                ${index < editDragPairs.length - 1 ? `
-                <button type="button" 
-                        onclick="moveEditCodeBlock(${index}, 'down')" 
-                        class="absolute bottom-2 right-2 bg-blue-500 hover:bg-blue-600 text-white rounded px-2 py-1 text-xs font-bold opacity-0 group-hover:opacity-100 transition">
-                    ↓
-                </button>
-                ` : ''}
-                ${index > 0 ? `
-                <button type="button" 
-                        onclick="moveEditCodeBlock(${index}, 'up')" 
-                        class="absolute bottom-2 right-10 bg-blue-500 hover:bg-blue-600 text-white rounded px-2 py-1 text-xs font-bold opacity-0 group-hover:opacity-100 transition">
-                    ↑
-                </button>
-                ` : ''}
-            `;
-            blocksContainer.appendChild(blockDiv);
+        // 設定輸入框的值
+        editDragPairs.forEach((pair, index) => {
+            const leftInput = container.querySelector(`textarea[data-pair-index="${index}"][data-field="left"]`);
+            const rightInput = container.querySelector(`textarea[data-pair-index="${index}"][data-field="right"]`);
+            if (leftInput) leftInput.value = pair.left;
+            if (rightInput) rightInput.value = pair.right;
+        });
+        
+        // 綁定輸入事件
+        container.querySelectorAll('.edit-drag-pair-input').forEach(input => {
+            input.addEventListener('input', function() {
+                const index = parseInt(this.dataset.pairIndex);
+                const field = this.dataset.field;
+                editDragPairs[index][field] = this.value;
+            });
         });
     }
 
-    // 刪除程式片段（編輯表單）
-    function removeEditCodeBlock(index) {
+    // 刪除配對（編輯表單）
+    function removeEditDragPair(index) {
         editDragPairs.splice(index, 1);
-        renderEditCodeBlocks();
+        renderEditDragPairs();
     }
 
-    // 移動程式片段順序（編輯表單）
-    function moveEditCodeBlock(index, direction) {
+    // 移動配對順序（編輯表單）
+    function moveEditDragPair(index, direction) {
         if (direction === 'up' && index > 0) {
             [editDragPairs[index], editDragPairs[index - 1]] = [editDragPairs[index - 1], editDragPairs[index]];
         } else if (direction === 'down' && index < editDragPairs.length - 1) {
             [editDragPairs[index], editDragPairs[index + 1]] = [editDragPairs[index + 1], editDragPairs[index]];
         }
-        renderEditCodeBlocks();
+        renderEditDragPairs();
     }
 
     // 編輯表單的拖拉方塊編輯器狀態
-    let editDragPairs = [];
+    let editDragPairs = []; // 格式：[{left: '', right: ''}, ...]
 
     // 更新題型格式提示（編輯表單）
     document.getElementById('edit-type').addEventListener('change', function() {
@@ -1184,12 +1206,19 @@
         // 如果是拖拉方塊，從編輯器獲取數據
         if (questionType === '拖拉方塊') {
             if (newDragPairs.length === 0) {
-                showMessage('❌ 請至少新增一個程式片段');
+                showMessage('❌ 請至少新增一組配對');
                 return;
             }
             
-            // 格式：每行一個程式碼片段（按正確順序）
-            options = newDragPairs.join('\n');
+            // 檢查左側是否都有填寫
+            const hasEmptyLeft = newDragPairs.some(pair => !pair.left.trim());
+            if (hasEmptyLeft) {
+                showMessage('❌ 左側程式片段不能為空');
+                return;
+            }
+            
+            // 格式：左側|右側\n左側|右側（右側可以為空）
+            options = newDragPairs.map(pair => `${pair.left.trim()}|${pair.right.trim()}`).join('\n');
             answer = 'auto';
         } else {
             options = document.getElementById('new-options').value;
