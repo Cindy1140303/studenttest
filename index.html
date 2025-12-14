@@ -470,6 +470,13 @@
                                     • 右側留空時顯示為虛線框，學生需要拖入正確片段
                                 </p>
                             </div>
+                            
+                            <!-- 答案欄位 -->
+                            <div class="mt-6">
+                                <label class="block text-sm font-medium text-gray-700 mb-2">答案（正確擺放順序）*</label>
+                                <input type="text" id="new-drag-answer" required class="input-style w-full" placeholder="例如：1,2,3,4 或填入 auto 讓系統自動驗證">
+                                <p class="text-xs text-gray-500 mt-1">💡 填入正確擺放順序（例如：1,2,3,4）或填入 auto 讓系統自動驗證</p>
+                            </div>
                         </div>
                     </div>
                     <div class="flex space-x-3 pt-4">
@@ -564,6 +571,13 @@
                                     • 學生需要將片段拖到右側對應的位置<br>
                                     • 系統會自動驗證順序是否正確
                                 </p>
+                            </div>
+                            
+                            <!-- 答案欄位 -->
+                            <div class="mt-6">
+                                <label class="block text-sm font-medium text-gray-700 mb-2">答案（正確擺放順序）*</label>
+                                <input type="text" id="edit-drag-answer" required class="input-style w-full" placeholder="例如：1,2,3,4 或填入 auto 讓系統自動驗證">
+                                <p class="text-xs text-gray-500 mt-1">💡 填入正確擺放順序（例如：1,2,3,4）或填入 auto 讓系統自動驗證</p>
                             </div>
                         </div>
                     </div>
@@ -827,6 +841,9 @@
             document.getElementById('edit-standard-fields').classList.add('hidden');
             document.getElementById('edit-drag-block-editor').classList.remove('hidden');
             
+            // 填入拖拉方塊的答案
+            document.getElementById('edit-drag-answer').value = question.answer || '';
+            
             // 解析現有數據：左側|右側\n左側|右側
             if (question.options && question.options.trim()) {
                 editDragPairs = question.options.split('\n')
@@ -877,7 +894,8 @@
             
             // 格式：左側|右側\n左側|右側（右側可以為空）
             options = editDragPairs.map(pair => `${pair.left.trim()}|${pair.right.trim()}`).join('\n');
-            answer = 'auto';
+            // 從拖拉方塊專用答案欄位獲取答案
+            answer = document.getElementById('edit-drag-answer').value;
         } else {
             options = document.getElementById('edit-options').value;
             answer = document.getElementById('edit-answer').value;
@@ -1372,7 +1390,8 @@
             
             // 格式：左側|右側\n左側|右側（右側可以為空）
             options = newDragPairs.map(pair => `${pair.left.trim()}|${pair.right.trim()}`).join('\n');
-            answer = 'auto';
+            // 從拖拉方塊專用答案欄位獲取答案
+            answer = document.getElementById('new-drag-answer').value;
         } else {
             options = document.getElementById('new-options').value;
             answer = document.getElementById('new-answer').value;
