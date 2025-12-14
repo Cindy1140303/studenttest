@@ -1002,7 +1002,7 @@
         '拖拉方塊': {
             optionsPlaceholder: 'def factorial(n):\n    if n < 0: return None\n    result = 1\n    for i in range(1, n + 1):\n        result *= i\n    return result',
             optionsHint: '拖拉方塊: 每行一個程式碼片段，按正確順序填寫(學生答題時會被打亂)',
-            answerHint: '填入 auto (系統會檢查程式碼順序是否正確)'
+            answerHint: '填入正確擺放順序（例如：1,2,3,4 表示第1組在第1位，第2組在第2位...）或填入 auto 讓系統自動驗證'
         }
     };
 
@@ -1021,20 +1021,21 @@
         
         // 切換顯示模式
         if (selectedType === '拖拉方塊') {
-            standardFields.classList.add('hidden');
+            // 隱藏選項欄位，但保留答案欄位
+            document.getElementById('new-options-container').classList.add('hidden');
             dragBlockEditor.classList.remove('hidden');
-            // 移除 required 屬性
+            // 移除選項的 required 屬性
             optionsField.removeAttribute('required');
-            answerField.removeAttribute('required');
-            // 拖拉方塊固定為 auto
-            answerField.value = 'auto';
+            // 保留答案為必填
+            answerField.setAttribute('required', 'required');
+            answerField.removeAttribute('readonly');
         } else {
+            document.getElementById('new-options-container').classList.remove('hidden');
             standardFields.classList.remove('hidden');
             dragBlockEditor.classList.add('hidden');
             // 恢復 required 屬性
             optionsField.setAttribute('required', 'required');
             answerField.setAttribute('required', 'required');
-            // 移除 readonly 屬性，確保可以編輯
             answerField.removeAttribute('readonly');
         }
         
@@ -1044,11 +1045,11 @@
             formatHint.textContent = format.optionsHint;
             answerHelp.textContent = format.answerHint;
             
-            // 只有連連看自動填入 auto（拖拉方塊已在上面處理）
+            // 只有連連看自動填入 auto
             if (selectedType === '連連看') {
                 answerField.value = 'auto';
-            } else if (selectedType !== '拖拉方塊') {
-                // 其他題型清空，讓管理者填寫
+            } else {
+                // 其他題型（包括拖拉方塊）清空，讓管理者填寫
                 answerField.value = '';
             }
         } else {
@@ -1285,13 +1286,14 @@
         
         // 切換顯示模式
         if (selectedType === '拖拉方塊') {
-            standardFields.classList.add('hidden');
+            // 隱藏選項欄位，但保留答案欄位
+            document.getElementById('edit-options-container').classList.add('hidden');
             dragBlockEditor.classList.remove('hidden');
-            // 移除 required 屬性
+            // 移除選項的 required 屬性
             optionsField.removeAttribute('required');
-            answerField.removeAttribute('required');
-            // 拖拉方塊固定為 auto
-            answerField.value = 'auto';
+            // 保留答案為必填
+            answerField.setAttribute('required', 'required');
+            answerField.removeAttribute('readonly');
             
             // 如果有現有數據，解析並顯示
             if (optionsField.value && optionsField.value.trim()) {
@@ -1299,12 +1301,12 @@
                 renderEditCodeBlocks();
             }
         } else {
+            document.getElementById('edit-options-container').classList.remove('hidden');
             standardFields.classList.remove('hidden');
             dragBlockEditor.classList.add('hidden');
             // 恢復 required 屬性
             optionsField.setAttribute('required', 'required');
             answerField.setAttribute('required', 'required');
-            // 移除 readonly 屬性，確保可以編輯
             answerField.removeAttribute('readonly');
         }
         
@@ -1314,14 +1316,14 @@
             formatHint.textContent = format.optionsHint;
             answerHelp.textContent = format.answerHint;
             
-            // 只有連連看自動填入 auto（拖拉方塊已在上面處理）
+            // 只有連連看自動填入 auto
             if (selectedType === '連連看') {
                 if (!answerField.value || answerField.value === '') {
                     answerField.value = 'auto';
                 }
-            } else if (selectedType !== '拖拉方塊') {
-                // 其他題型清空 auto，讓管理者填寫
-                if (answerField.value === 'auto') {
+            } else {
+                // 其他題型（包括拖拉方塊）如果是 auto 就清空，讓管理者填寫
+                if (answerField.value === 'auto' && selectedType !== '連連看') {
                     answerField.value = '';
                 }
             }
