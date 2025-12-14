@@ -182,6 +182,15 @@
                 };
             });
 
+            // 解析答案順序（如 "2,5,4,3,1" 表示第1槽位放第2個區塊）
+            if (currentQuestion.answer && currentQuestion.answer.toLowerCase() !== 'auto') {
+                const answerOrder = currentQuestion.answer.split(',').map(num => parseInt(num.trim()) - 1);
+                currentQuestion.correctOrder = answerOrder;
+            } else {
+                // 如果答案是 auto 或不存在，使用原始順序（0,1,2,3,4...）
+                currentQuestion.correctOrder = currentQuestion.correctBlocks.map((_, i) => i);
+            }
+
             resetChallenge();
         }
 
@@ -342,12 +351,11 @@
             let isCorrect = true;
             let correctCount = 0;
             const feedbackMessages = [];
-            const correctOrderMap = currentQuestion.correctBlocks.reduce((map, block) => {
-                map[block.order] = block.id;
-                return map;
-            }, {});
 
-            slots.forEach(slot => {
+            // 使用正確的答案順序來驗證
+            const correctOrder = currentQuestion.correctOrder || currentQuestion.correctBlocks.map((_, i) => i);
+
+            slots.forEach((slot, slotIndex) => {
                 const slotId = parseInt(slot.dataset.slotId);
                 const blockElement = slot.querySelector('.code-block');
 
@@ -358,13 +366,17 @@
                 }
 
                 const blockId = parseInt(blockElement.dataset.blockId);
-                const expectedBlockId = correctOrderMap[slotId];
+                // 計算這個區塊的原始索引（blockId - 100）
+                const blockIndex = blockId - 100;
+                // 檢查這個槽位應該放哪個區塊的索引
+                const expectedBlockIndex = correctOrder[slotIndex];
 
-                if (blockId === expectedBlockId) {
+                if (blockIndex === expectedBlockIndex) {
                     correctCount++;
                 } else {
                     isCorrect = false;
-                    feedbackMessages.push(`第 ${slotId + 1} 行放置錯誤。`);
+                    const expectedText = currentQuestion.correctBlocks[expectedBlockIndex]?.text || '?';
+                    feedbackMessages.push(`第 ${slotId + 1} 行應該是 "${expectedText}"`);
                 }
             });
 
