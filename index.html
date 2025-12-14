@@ -1039,16 +1039,14 @@
         
         // 切換顯示模式
         if (selectedType === '拖拉方塊') {
-            // 隱藏選項欄位，但保留答案欄位
-            document.getElementById('new-options-container').classList.add('hidden');
+            // 完全隱藏標準欄位（選項和答案）
+            standardFields.classList.add('hidden');
             dragBlockEditor.classList.remove('hidden');
-            // 移除選項的 required 屬性
+            // 移除標準欄位的 required 屬性
             optionsField.removeAttribute('required');
-            // 保留答案為必填
-            answerField.setAttribute('required', 'required');
-            answerField.removeAttribute('readonly');
+            answerField.removeAttribute('required');
         } else {
-            document.getElementById('new-options-container').classList.remove('hidden');
+            // 顯示標準欄位，隱藏拖拉方塊編輯器
             standardFields.classList.remove('hidden');
             dragBlockEditor.classList.add('hidden');
             // 恢復 required 屬性
@@ -1304,14 +1302,12 @@
         
         // 切換顯示模式
         if (selectedType === '拖拉方塊') {
-            // 隱藏選項欄位，但保留答案欄位
-            document.getElementById('edit-options-container').classList.add('hidden');
+            // 完全隱藏標準欄位（選項和答案）
+            standardFields.classList.add('hidden');
             dragBlockEditor.classList.remove('hidden');
-            // 移除選項的 required 屬性
+            // 移除標準欄位的 required 屬性
             optionsField.removeAttribute('required');
-            // 保留答案為必填
-            answerField.setAttribute('required', 'required');
-            answerField.removeAttribute('readonly');
+            answerField.removeAttribute('required');
             
             // 如果有現有數據，解析並顯示
             if (optionsField.value && optionsField.value.trim()) {
@@ -1319,7 +1315,7 @@
                 renderEditCodeBlocks();
             }
         } else {
-            document.getElementById('edit-options-container').classList.remove('hidden');
+            // 顯示標準欄位，隱藏拖拉方塊編輯器
             standardFields.classList.remove('hidden');
             dragBlockEditor.classList.add('hidden');
             // 恢復 required 屬性
