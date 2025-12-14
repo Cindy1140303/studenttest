@@ -201,6 +201,68 @@ app.delete('/api/questions/:id', async (req, res) => {
   }
 });
 
+// Import questions from Excel data
+app.post('/api/questions/import', async (req, res) => {
+  try {
+    await connectToDatabase();
+    const { questions } = req.body;
+    
+    if (!Array.isArray(questions) || questions.length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: '無效的資料格式，需要題目陣列'
+      });
+    }
+    
+    const results = {
+      success: [],
+      failed: []
+    };
+    
+    for (const questionData of questions) {
+      try {
+        // 處理拖拉方塊題型的特殊格式
+        if (questionData.type === '拖拉方塊') {
+          // 如果選項使用分號分隔，轉換為換行格式
+          if (questionData.options && questionData.options.includes(';')) {
+            questionData.options = questionData.options
+              .split(';')
+              .map(item => item.trim())
+              .filter(item => item)
+              .join('\n');
+          }
+        }
+        
+        const question = await Question.create(questionData);
+        results.success.push({
+          content: questionData.content,
+          id: question._id
+        });
+      } catch (error) {
+        results.failed.push({
+          content: questionData.content,
+          error: error.message
+        });
+      }
+    }
+    
+    res.json({
+      success: true,
+      message: `成功匯入 ${results.success.length} 筆，失敗 ${results.failed.length} 筆`,
+      imported: results.success.length,
+      failed: results.failed.length,
+      details: results
+    });
+  } catch (error) {
+    console.error('Import error:', error);
+    res.status(500).json({
+      success: false,
+      message: '匯入失敗',
+      error: error.message
+    });
+  }
+});
+
 // Modes routes
 app.get('/api/modes', async (req, res) => {
   try {
