@@ -375,9 +375,112 @@
             </div>
 
             <!-- 答題記錄 Tab Content -->
-            <div id="tab-record" class="hidden text-center p-12 text-gray-500">
-                <i data-lucide="clipboard-list" class="w-16 h-16 mx-auto mb-4"></i>
-                <p class="text-xl">這是「答題記錄」的內容，用於查看學生的作答歷史。</p>
+            <div id="tab-record" class="hidden p-8">
+                <div class="max-w-7xl mx-auto">
+                    <div class="flex justify-between items-center mb-6">
+                        <h2 class="text-3xl font-bold text-gray-800">答題記錄統計</h2>
+                        <button onclick="refreshRecords()" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg font-semibold flex items-center gap-2">
+                            <i data-lucide="refresh-cw" class="w-4 h-4"></i>
+                            重新整理
+                        </button>
+                    </div>
+
+                    <!-- 統計摘要卡片 -->
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+                        <div class="bg-gradient-to-br from-blue-500 to-blue-600 text-white p-6 rounded-xl shadow-lg">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-blue-100 text-sm">總答題次數</p>
+                                    <p id="total-attempts" class="text-3xl font-bold mt-2">0</p>
+                                </div>
+                                <i data-lucide="file-text" class="w-12 h-12 opacity-50"></i>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-gradient-to-br from-green-500 to-green-600 text-white p-6 rounded-xl shadow-lg">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-green-100 text-sm">答對次數</p>
+                                    <p id="correct-attempts" class="text-3xl font-bold mt-2">0</p>
+                                </div>
+                                <i data-lucide="check-circle" class="w-12 h-12 opacity-50"></i>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-gradient-to-br from-purple-500 to-purple-600 text-white p-6 rounded-xl shadow-lg">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-purple-100 text-sm">整體答對率</p>
+                                    <p id="overall-rate" class="text-3xl font-bold mt-2">0%</p>
+                                </div>
+                                <i data-lucide="trending-up" class="w-12 h-12 opacity-50"></i>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-gradient-to-br from-orange-500 to-orange-600 text-white p-6 rounded-xl shadow-lg">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-orange-100 text-sm">平均答題時間</p>
+                                    <p id="avg-time" class="text-3xl font-bold mt-2">0秒</p>
+                                </div>
+                                <i data-lucide="clock" class="w-12 h-12 opacity-50"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 篩選器 -->
+                    <div class="bg-white p-4 rounded-lg shadow mb-6">
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">題型篩選</label>
+                                <select id="filter-type" onchange="filterRecords()" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                    <option value="">全部題型</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">答題結果</label>
+                                <select id="filter-result" onchange="filterRecords()" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                    <option value="">全部結果</option>
+                                    <option value="correct">答對</option>
+                                    <option value="incorrect">答錯</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">課程篩選</label>
+                                <select id="filter-course" onchange="filterRecords()" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                    <option value="">全部課程</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 記錄列表 -->
+                    <div class="bg-white rounded-lg shadow overflow-hidden">
+                        <div class="overflow-x-auto">
+                            <table class="min-w-full divide-y divide-gray-200">
+                                <thead class="bg-gray-50">
+                                    <tr>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">答題時間</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">課程</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">題型</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">學生答案</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">正確答案</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">結果</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">花費時間</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="records-table-body" class="bg-white divide-y divide-gray-200">
+                                    <tr>
+                                        <td colspan="7" class="px-6 py-8 text-center text-gray-500">
+                                            <i data-lucide="loader" class="w-8 h-8 mx-auto mb-2 animate-spin"></i>
+                                            <p>載入中...</p>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
             </div>
 
         </div>
@@ -968,6 +1071,12 @@
             // Re-render table when switching back to management (optional, but good practice for dynamic data)
             if (targetTab === 'management') {
                 fetchQuestions(); // 從 API 載入資料
+            }
+            
+            // 切換到答題記錄時重新載入數據並初始化 icons
+            if (targetTab === 'record') {
+                loadRecords();
+                setTimeout(() => lucide.createIcons(), 100); // 延遲初始化確保 DOM 已更新
             }
         });
     });
@@ -2129,6 +2238,156 @@
         }
     });
 
+    // ===== 答題記錄相關函數 =====
+    let allRecords = [];
+    let filteredRecords = [];
+
+    // 載入答題記錄
+    async function loadRecords() {
+        try {
+            const response = await fetch(`${API_BASE_URL}/records`);
+            const result = await response.json();
+            
+            if (result.success) {
+                allRecords = result.data;
+                filteredRecords = [...allRecords];
+                
+                // 更新統計摘要
+                updateStatsSummary();
+                
+                // 更新篩選器選項
+                populateFilters();
+                
+                // 顯示記錄表格
+                displayRecords(filteredRecords);
+            } else {
+                showNoRecords();
+            }
+        } catch (error) {
+            console.error('載入記錄失敗:', error);
+            showNoRecords('載入記錄時發生錯誤');
+        }
+    }
+
+    // 更新統計摘要
+    function updateStatsSummary() {
+        const totalAttempts = allRecords.length;
+        const correctAttempts = allRecords.filter(r => r.isCorrect).length;
+        const correctRate = totalAttempts > 0 ? ((correctAttempts / totalAttempts) * 100).toFixed(1) : 0;
+        const avgTime = totalAttempts > 0 ? Math.round(allRecords.reduce((sum, r) => sum + (r.timeSpent || 0), 0) / totalAttempts) : 0;
+
+        document.getElementById('total-attempts').textContent = totalAttempts;
+        document.getElementById('correct-attempts').textContent = correctAttempts;
+        document.getElementById('overall-rate').textContent = correctRate + '%';
+        document.getElementById('avg-time').textContent = avgTime + '秒';
+    }
+
+    // 填充篩選器選項
+    function populateFilters() {
+        // 題型篩選
+        const types = [...new Set(allRecords.map(r => r.questionType).filter(Boolean))];
+        const typeSelect = document.getElementById('filter-type');
+        typeSelect.innerHTML = '<option value="">全部題型</option>';
+        types.forEach(type => {
+            typeSelect.innerHTML += `<option value="${type}">${type}</option>`;
+        });
+
+        // 課程篩選
+        const courses = [...new Set(allRecords.map(r => r.courseName).filter(Boolean))];
+        const courseSelect = document.getElementById('filter-course');
+        courseSelect.innerHTML = '<option value="">全部課程</option>';
+        courses.forEach(course => {
+            courseSelect.innerHTML += `<option value="${course}">${course}</option>`;
+        });
+    }
+
+    // 篩選記錄
+    function filterRecords() {
+        const typeFilter = document.getElementById('filter-type').value;
+        const resultFilter = document.getElementById('filter-result').value;
+        const courseFilter = document.getElementById('filter-course').value;
+
+        filteredRecords = allRecords.filter(record => {
+            if (typeFilter && record.questionType !== typeFilter) return false;
+            if (resultFilter === 'correct' && !record.isCorrect) return false;
+            if (resultFilter === 'incorrect' && record.isCorrect) return false;
+            if (courseFilter && record.courseName !== courseFilter) return false;
+            return true;
+        });
+
+        displayRecords(filteredRecords);
+    }
+
+    // 顯示記錄表格
+    function displayRecords(records) {
+        const tbody = document.getElementById('records-table-body');
+        
+        if (records.length === 0) {
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="7" class="px-6 py-8 text-center text-gray-500">
+                        <i data-lucide="inbox" class="w-12 h-12 mx-auto mb-2 text-gray-400"></i>
+                        <p>目前沒有符合條件的記錄</p>
+                    </td>
+                </tr>
+            `;
+            lucide.createIcons();
+            return;
+        }
+
+        tbody.innerHTML = records.map(record => {
+            const date = new Date(record.answeredAt);
+            const formattedDate = `${date.getFullYear()}/${(date.getMonth()+1).toString().padStart(2,'0')}/${date.getDate().toString().padStart(2,'0')} ${date.getHours().toString().padStart(2,'0')}:${date.getMinutes().toString().padStart(2,'0')}`;
+            const resultBadge = record.isCorrect 
+                ? '<span class="px-2 py-1 bg-green-100 text-green-800 text-xs font-semibold rounded-full">✓ 答對</span>'
+                : '<span class="px-2 py-1 bg-red-100 text-red-800 text-xs font-semibold rounded-full">✗ 答錯</span>';
+            
+            return `
+                <tr class="hover:bg-gray-50">
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${formattedDate}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${record.courseName || '-'}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${record.questionType || '-'}</td>
+                    <td class="px-6 py-4 text-sm text-gray-900">
+                        <span class="px-2 py-1 bg-blue-50 text-blue-700 rounded font-mono text-xs">${record.answer || '-'}</span>
+                    </td>
+                    <td class="px-6 py-4 text-sm text-gray-900">
+                        <span class="px-2 py-1 bg-gray-50 text-gray-700 rounded font-mono text-xs">${record.correctAnswer || '-'}</span>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm">${resultBadge}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${record.timeSpent || 0} 秒</td>
+                </tr>
+            `;
+        }).join('');
+        
+        lucide.createIcons();
+    }
+
+    // 顯示無記錄訊息
+    function showNoRecords(message = '目前還沒有任何答題記錄') {
+        const tbody = document.getElementById('records-table-body');
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="7" class="px-6 py-8 text-center text-gray-500">
+                    <i data-lucide="inbox" class="w-12 h-12 mx-auto mb-2 text-gray-400"></i>
+                    <p>${message}</p>
+                </td>
+            </tr>
+        `;
+        lucide.createIcons();
+        
+        // 清空統計
+        document.getElementById('total-attempts').textContent = '0';
+        document.getElementById('correct-attempts').textContent = '0';
+        document.getElementById('overall-rate').textContent = '0%';
+        document.getElementById('avg-time').textContent = '0秒';
+    }
+
+    // 重新整理記錄
+    function refreshRecords() {
+        loadRecords();
+        showMessage('✓ 記錄已重新整理');
+    }
+
     // Initial Tab Setup: Set '考題分派' as active on load and render questions for '考題管理'
     window.onload = function() {
         // Set '考題分派' as the initial active tab
@@ -2142,6 +2401,9 @@
         
         // 載入模式管理資料
         loadModes();
+        
+        // 載入答題記錄
+        loadRecords();
         
         // Initialize all icons
         lucide.createIcons();
