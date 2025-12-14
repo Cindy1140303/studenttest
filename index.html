@@ -9,6 +9,8 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
     <!-- Load Lucide icons for responsive design -->
     <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+    <!-- Load SheetJS for Excel parsing -->
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
     
     <style>
         /* Custom Styles to match the mockup's aesthetic */
@@ -1593,19 +1595,61 @@
             return;
         }
         
-        const formData = new FormData();
-        formData.append('file', selectedFile);
-        
         try {
+            // 讀取 Excel 檔案
+            const data = await selectedFile.arrayBuffer();
+            const workbook = XLSX.read(data);
+            
+            // 讀取第一個工作表
+            const sheetName = workbook.SheetNames[0];
+            const worksheet = workbook.Sheets[sheetName];
+            
+            // 轉換為 JSON（第一行為標題）
+            const jsonData = XLSX.utils.sheet_to_json(worksheet);
+            
+            if (jsonData.length === 0) {
+                showMessage('❌ Excel 檔案沒有資料');
+                return;
+            }
+            
+            // 轉換為後端期望的格式
+            const questions = jsonData.map(row => {
+                const questionData = {
+                    course: row['課別'] || row['课别'] || '',
+                    chapter: row['章節'] || row['章节'] || '',
+                    knowledge: row['知識點'] || row['知识点'] || '',
+                    type: row['題型'] || row['题型'] || '',
+                    content: row['題目內容'] || row['题目内容'] || '',
+                    options: row['選項'] || row['选项'] || '',
+                    answer: row['答案'] || ''
+                };
+                
+                // 處理拖拉方塊的選項格式（如果使用分號分隔）
+                if (questionData.type === '拖拉方塊' && questionData.options) {
+                    // 確保格式正確
+                    if (!questionData.options.includes('\n') && questionData.options.includes(';')) {
+                        // 分號分隔格式，保持原樣（後端會處理）
+                    }
+                }
+                
+                return questionData;
+            });
+            
+            console.log('📤 準備匯入的資料:', questions);
+            
+            // 發送到後端
             const response = await fetch(`${API_BASE_URL}/questions/import`, {
                 method: 'POST',
-                body: formData
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ questions })
             });
             
             const result = await response.json();
             
             if (result.success) {
-                showMessage(`✅ 成功匯入 ${result.imported || 0} 筆考題！`);
+                showMessage(`✅ 成功匯入 ${result.imported || 0} 筆考題！${result.failed > 0 ? `失敗 ${result.failed} 筆` : ''}`);
                 importModal.classList.add('hidden');
                 importModal.classList.remove('flex');
                 fileInput.value = '';
@@ -1617,6 +1661,7 @@
                 showMessage('❌ 匯入失敗：' + result.message);
             }
         } catch (error) {
+            console.error('匯入錯誤:', error);
             showMessage('❌ 匯入失敗：' + error.message);
         }
     });
