@@ -355,15 +355,10 @@
             // 使用正確的答案順序來驗證
             const correctOrder = currentQuestion.correctOrder || currentQuestion.correctBlocks.map((_, i) => i);
 
-            console.log('正確順序:', correctOrder);
-            console.log('槽位數量:', slots.length);
-
-            slots.forEach((slot, slotIndex) => {
+            slots.forEach((slot) => {
                 const slotId = parseInt(slot.dataset.slotId);
-                // 尋找已放置的區塊（可能是 code-block 或 code-block-placed）
+                // 尋找已放置的區塊
                 const blockElement = slot.querySelector('[data-block-id]');
-                
-                console.log(`槽位 ${slotId}:`, blockElement ? `找到區塊 ID ${blockElement.dataset.blockId}` : '未找到區塊');
 
                 if (!blockElement) {
                     isCorrect = false;
@@ -374,10 +369,8 @@
                 const blockId = parseInt(blockElement.dataset.blockId);
                 // 計算這個區塊的原始索引（blockId - 100）
                 const blockIndex = blockId - 100;
-                // 檢查這個槽位應該放哪個區塊的索引
-                const expectedBlockIndex = correctOrder[slotIndex];
-
-                console.log(`槽位 ${slotId}: 區塊索引=${blockIndex}, 期望索引=${expectedBlockIndex}`);
+                // 使用 slotId 而非 slotIndex 來索引正確順序
+                const expectedBlockIndex = correctOrder[slotId];
 
                 if (blockIndex === expectedBlockIndex) {
                     correctCount++;
