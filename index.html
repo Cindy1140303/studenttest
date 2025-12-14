@@ -1026,12 +1026,16 @@
             // 移除 required 屬性
             optionsField.removeAttribute('required');
             answerField.removeAttribute('required');
+            // 拖拉方塊固定為 auto
+            answerField.value = 'auto';
         } else {
             standardFields.classList.remove('hidden');
             dragBlockEditor.classList.add('hidden');
             // 恢復 required 屬性
             optionsField.setAttribute('required', 'required');
             answerField.setAttribute('required', 'required');
+            // 移除 readonly 屬性，確保可以編輯
+            answerField.removeAttribute('readonly');
         }
         
         if (selectedType && questionTypeFormats[selectedType]) {
@@ -1040,10 +1044,11 @@
             formatHint.textContent = format.optionsHint;
             answerHelp.textContent = format.answerHint;
             
-            // 為連連看、拖拉方塊自動填入 auto
-            if (selectedType === '連連看' || selectedType === '拖拉方塊') {
+            // 只有連連看自動填入 auto（拖拉方塊已在上面處理）
+            if (selectedType === '連連看') {
                 answerField.value = 'auto';
-            } else {
+            } else if (selectedType !== '拖拉方塊') {
+                // 其他題型清空，讓管理者填寫
                 answerField.value = '';
             }
         } else {
@@ -1285,6 +1290,8 @@
             // 移除 required 屬性
             optionsField.removeAttribute('required');
             answerField.removeAttribute('required');
+            // 拖拉方塊固定為 auto
+            answerField.value = 'auto';
             
             // 如果有現有數據，解析並顯示
             if (optionsField.value && optionsField.value.trim()) {
@@ -1297,6 +1304,8 @@
             // 恢復 required 屬性
             optionsField.setAttribute('required', 'required');
             answerField.setAttribute('required', 'required');
+            // 移除 readonly 屬性，確保可以編輯
+            answerField.removeAttribute('readonly');
         }
         
         if (selectedType && questionTypeFormats[selectedType]) {
@@ -1305,10 +1314,15 @@
             formatHint.textContent = format.optionsHint;
             answerHelp.textContent = format.answerHint;
             
-            // 為連連看、拖拉方塊自動填入 auto
-            if (selectedType === '連連看' || selectedType === '拖拉方塊') {
+            // 只有連連看自動填入 auto（拖拉方塊已在上面處理）
+            if (selectedType === '連連看') {
                 if (!answerField.value || answerField.value === '') {
                     answerField.value = 'auto';
+                }
+            } else if (selectedType !== '拖拉方塊') {
+                // 其他題型清空 auto，讓管理者填寫
+                if (answerField.value === 'auto') {
+                    answerField.value = '';
                 }
             }
         } else {
