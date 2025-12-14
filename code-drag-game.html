@@ -357,7 +357,8 @@
 
             slots.forEach((slot, slotIndex) => {
                 const slotId = parseInt(slot.dataset.slotId);
-                const blockElement = slot.querySelector('.code-block');
+                // 尋找已放置的區塊（可能是 code-block 或 code-block-placed）
+                const blockElement = slot.querySelector('.code-block, .code-block-placed');
 
                 if (!blockElement) {
                     isCorrect = false;
