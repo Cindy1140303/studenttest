@@ -1045,6 +1045,16 @@
             // 移除標準欄位的 required 屬性
             optionsField.removeAttribute('required');
             answerField.removeAttribute('required');
+            
+            // 如果是空的，初始化一些配對區塊
+            if (newDragPairs.length === 0) {
+                newDragPairs = [
+                    { left: '', right: '' },
+                    { left: '', right: '' },
+                    { left: '', right: '' }
+                ];
+            }
+            renderNewDragPairs();
         } else {
             // 顯示標準欄位，隱藏拖拉方塊編輯器
             standardFields.classList.remove('hidden');
@@ -1353,6 +1363,10 @@
     const addForm = document.getElementById('add-question-form');
     
     document.getElementById('manual-add-button').addEventListener('click', function() {
+        // 重置拖拉方塊編輯器
+        newDragPairs = [];
+        renderNewDragPairs();
+        
         addModal.classList.remove('hidden');
         addModal.classList.add('flex');
         lucide.createIcons();
@@ -1362,6 +1376,9 @@
         addModal.classList.add('hidden');
         addModal.classList.remove('flex');
         addForm.reset();
+        // 清空拖拉方塊編輯器
+        newDragPairs = [];
+        renderNewDragPairs();
     });
     
     addForm.addEventListener('submit', async function(e) {
