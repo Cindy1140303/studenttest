@@ -3,12 +3,12 @@ const mongoose = require('mongoose');
 const recordSchema = new mongoose.Schema({
   studentId: {
     type: String,
-    required: true,
+    required: false,  // 改為可選，支援匿名記錄
     index: true
   },
   studentName: {
     type: String,
-    required: true
+    required: false  // 改為可選，支援匿名記錄
   },
   questionId: {
     type: mongoose.Schema.Types.ObjectId,

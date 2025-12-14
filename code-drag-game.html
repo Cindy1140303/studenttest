@@ -124,6 +124,7 @@
         const API_BASE_URL = 'https://studenttest.vercel.app/api';
         let currentQuestion = null;
         let currentSlots = {};
+        let startTime = null;  // 記錄答題開始時間
 
         // 從 URL 參數或 API 載入題目
         async function loadQuestion() {
@@ -147,6 +148,7 @@
                     
                     if (result.success) {
                         currentQuestion = result.data;
+                        startTime = Date.now();  // 開始計時
                         parseAndDisplayQuestion();
                     } else {
                         showError(`無法載入題目: ${result.error || '未知錯誤'}`);
@@ -381,6 +383,22 @@
                 }
             });
 
+            // 計算答題時間
+            const timeSpent = startTime ? Math.round((Date.now() - startTime) / 1000) : 0;
+            
+            // 收集學生的答案（槽位順序）
+            const userAnswer = Array.from(slots).map(slot => {
+                const blockElement = slot.querySelector('[data-block-id]');
+                if (blockElement) {
+                    const blockId = parseInt(blockElement.dataset.blockId);
+                    return blockId - 100 + 1;  // 轉換為 1-based 索引
+                }
+                return null;
+            }).filter(x => x !== null).join(',');
+
+            // 記錄答題結果到資料庫
+            saveRecord(isCorrect, userAnswer, timeSpent);
+
             const modalTitle = document.getElementById('modal-title');
             const modalMessage = document.getElementById('modal-message');
 
@@ -388,7 +406,7 @@
                 modalTitle.textContent = "恭喜您！✅ 答案正確！";
                 modalTitle.classList.remove('text-red-600');
                 modalTitle.classList.add('text-green-600');
-                modalMessage.innerHTML = `您已成功組裝程式碼。`;
+                modalMessage.innerHTML = `您已成功組裝程式碼。<br><small class="text-gray-500">答題時間：${timeSpent} 秒</small>`;
             } else {
                 modalTitle.textContent = "抱歉，答案錯誤 ❌";
                 modalTitle.classList.remove('text-green-600');
@@ -398,6 +416,7 @@
                 if (feedbackMessages.length > 0) {
                     messageHtml += `<p class="font-bold">錯誤提示：</p><ul class="list-disc list-inside text-left mx-auto max-w-xs mt-2">${feedbackMessages.map(msg => `<li>${msg}</li>`).join('')}</ul>`;
                 }
+                messageHtml += `<small class="text-gray-500 mt-3 block">答題時間：${timeSpent} 秒</small>`;
                 modalMessage.innerHTML = messageHtml;
             }
 
@@ -405,7 +424,41 @@
             document.getElementById('result-modal').classList.add('flex');
         }
 
+        // 儲存答題記錄
+        async function saveRecord(isCorrect, userAnswer, timeSpent) {
+            try {
+                const recordData = {
+                    questionId: currentQuestion._id,
+                    questionType: currentQuestion.type,
+                    answer: userAnswer,
+                    correctAnswer: currentQuestion.answer,
+                    isCorrect: isCorrect,
+                    timeSpent: timeSpent,
+                    courseName: currentQuestion.course || '',
+                    courseId: currentQuestion.course || ''
+                };
+
+                const response = await fetch(`${API_BASE_URL}/records`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(recordData)
+                });
+
+                const result = await response.json();
+                if (result.success) {
+                    console.log('答題記錄已儲存');
+                } else {
+                    console.error('儲存記錄失敗:', result.message);
+                }
+            } catch (error) {
+                console.error('儲存記錄時發生錯誤:', error);
+            }
+        }
+
         function resetChallenge() {
+            startTime = Date.now();  // 重設時重新計時
             renderSlots();
             renderOptions();
         }

@@ -291,6 +291,90 @@ app.get('/api/records', async (req, res) => {
   }
 });
 
+app.post('/api/records', async (req, res) => {
+  try {
+    await connectToDatabase();
+    const recordData = {
+      questionId: req.body.questionId,
+      questionType: req.body.questionType,
+      answer: req.body.answer,
+      correctAnswer: req.body.correctAnswer,
+      isCorrect: req.body.isCorrect,
+      score: req.body.isCorrect ? 100 : 0,
+      timeSpent: req.body.timeSpent || 0,
+      courseId: req.body.courseId,
+      courseName: req.body.courseName,
+      answeredAt: new Date()
+    };
+    
+    const record = new Record(recordData);
+    await record.save();
+    
+    res.json({
+      success: true,
+      message: 'Record saved successfully',
+      data: record
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: 'Failed to save record',
+      error: error.message
+    });
+  }
+});
+
+// 獲取題目的統計資訊
+app.get('/api/records/stats/:questionId', async (req, res) => {
+  try {
+    await connectToDatabase();
+    const questionId = req.params.questionId;
+    
+    const stats = await Record.aggregate([
+      { $match: { questionId: new mongoose.Types.ObjectId(questionId) } },
+      {
+        $group: {
+          _id: '$questionId',
+          totalAttempts: { $sum: 1 },
+          correctAttempts: {
+            $sum: { $cond: ['$isCorrect', 1, 0] }
+          },
+          avgTimeSpent: { $avg: '$timeSpent' }
+        }
+      }
+    ]);
+    
+    if (stats.length === 0) {
+      return res.json({
+        success: true,
+        data: {
+          totalAttempts: 0,
+          correctAttempts: 0,
+          correctRate: 0,
+          avgTimeSpent: 0
+        }
+      });
+    }
+    
+    const result = stats[0];
+    res.json({
+      success: true,
+      data: {
+        totalAttempts: result.totalAttempts,
+        correctAttempts: result.correctAttempts,
+        correctRate: ((result.correctAttempts / result.totalAttempts) * 100).toFixed(2),
+        avgTimeSpent: Math.round(result.avgTimeSpent)
+      }
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch stats',
+      error: error.message
+    });
+  }
+});
+
 // Assignment routes
 app.get('/api/assignment', async (req, res) => {
   try {
